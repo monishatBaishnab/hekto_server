@@ -121,15 +121,15 @@ model Review {
 }
 
 model Order {
-  id          String         @id @default(uuid())
-  user_id     String
-  user        User           @relation(fields: [user_id], references: [id])
-  total_price Int
-  status      OrderStatus    @default(PENDING)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  products    OrderProduct[]
-  Transaction Transaction?
+  id           String         @id @default(uuid())
+  user_id      String
+  user         User           @relation(fields: [user_id], references: [id])
+  total_price  Int
+  status       OrderStatus    @default(PENDING)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  orderProduct OrderProduct[]
+  transaction  Transaction?
 
   @@map("orders")
 }
@@ -149,11 +149,10 @@ model OrderProduct {
 }
 
 model Follow {
-  user_id String
-  user    User   @relation(fields: [user_id], references: [id])
-  shop_id String
-  shop    Shop   @relation(fields: [shop_id], references: [id])
-
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id])
+  shop_id   String
+  shop      Shop     @relation(fields: [shop_id], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
