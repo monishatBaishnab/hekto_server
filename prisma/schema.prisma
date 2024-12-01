@@ -7,3 +7,169 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  AMARPAY
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique @db.VarChar(20)
+  password  String
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  shop      Shop?
+  review    Review[]
+  order     Order[]
+  follow    Follow[]
+
+  @@map("users")
+}
+
+model Shop {
+  id          String    @id @default(uuid())
+  user_id     String    @unique
+  user        User      @relation(fields: [user_id], references: [id])
+  name        String    @db.VarChar(255)
+  description String
+  logo        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  product     Product[]
+  follow      Follow[]
+
+  @@map("shops")
+}
+
+model Category {
+  id              String            @id @default(uuid())
+  name            String            @db.VarChar(255)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  productCategory ProductCategory[]
+
+  @@map("categories")
+}
+
+model Product {
+  id                String            @id @default(uuid())
+  shop_id           String
+  shop              Shop              @relation(fields: [shop_id], references: [id])
+  name              String            @db.VarChar(255)
+  price             Float
+  quantity          Int
+  availableQuantity Int
+  description       String
+  images            String
+  discount          Float?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  productCategory   ProductCategory[]
+  review            Review[]
+  OrderProduct      OrderProduct[]
+
+  @@map("products")
+}
+
+model ProductCategory {
+  product_id  String
+  product     Product  @relation(fields: [product_id], references: [id])
+  category_id String
+  category    Category @relation(fields: [category_id], references: [id])
+
+  @@id([product_id, category_id])
+  @@map("products_categories")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id])
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  rating     Int
+  comment    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+model Order {
+  id          String         @id @default(uuid())
+  user_id     String
+  user        User           @relation(fields: [user_id], references: [id])
+  total_price Int
+  status      OrderStatus    @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  products    OrderProduct[]
+  Transaction Transaction?
+
+  @@map("orders")
+}
+
+model OrderProduct {
+  id         String   @id @default(uuid())
+  order_id   String
+  order      Order    @relation(fields: [order_id], references: [id])
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id])
+  quantity   Int
+  price      Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("order_products")
+}
+
+model Follow {
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+  shop_id String
+  shop    Shop   @relation(fields: [shop_id], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([user_id, shop_id])
+  @@map("followers")
+}
+
+model Transaction {
+  id             String        @id @default(uuid())
+  order_id       String        @unique
+  order          Order         @relation(fields: [order_id], references: [id])
+  amount         Float
+  payment_method PaymentMethod
+  status         PaymentStatus
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("transactions")
+}
