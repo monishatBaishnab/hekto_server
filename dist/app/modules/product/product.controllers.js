@@ -12,52 +12,49 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.user_controllers = void 0;
+exports.product_controllers = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catch_async_1 = __importDefault(require("../../utils/catch_async"));
 const send_response_1 = __importDefault(require("../../utils/send_response"));
-const user_services_1 = require("./user.services");
-// Controller to fetch all users
+// Controller to fetch all Products
 const fetch_all = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "Users retrieved successfully.",
+        message: "Products retrieved successfully.",
     });
 }));
-// Controller to fetch a single user by ID
+// Controller to fetch a single Product by ID
 const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "User retrieved successfully.",
+        message: "Product retrieved successfully.",
     });
 }));
-// Controller to create a new user as 'ADMIN'
-const create_admin = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_services_1.user_services.create_admin_into_db(req.body, req.file);
+// Controller to create a new Product as 'ADMIN'
+const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     (0, send_response_1.default)(res, {
         status: http_status_1.default.CREATED,
         message: "Admin created successfully.",
-        data: result
     });
 }));
-// Controller to update an existing user by ID
+// Controller to update an existing Product by ID
 const update_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "User updated successfully.",
+        message: "Product updated successfully.",
     });
 }));
-// Controller to delete an existing user by ID
+// Controller to delete an existing Product by ID
 const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "User deleted successfully.",
+        message: "Product deleted successfully.",
     });
 }));
-exports.user_controllers = {
+exports.product_controllers = {
     fetch_all,
     fetch_single,
-    create_admin,
+    create_one,
     update_one,
     delete_one,
 };

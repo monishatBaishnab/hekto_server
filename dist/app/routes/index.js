@@ -4,6 +4,7 @@ exports.app_routes = void 0;
 const express_1 = require("express");
 const user_routes_1 = require("../modules/user/user.routes");
 const auth_routes_1 = require("../modules/auth/auth.routes");
+const category_routes_1 = require("../modules/category/category.routes");
 const routes = [
     {
         path: "/auth",
@@ -12,6 +13,10 @@ const routes = [
     {
         path: "/users",
         element: user_routes_1.user_routes,
+    },
+    {
+        path: "/categories",
+        element: category_routes_1.category_routes,
     },
 ];
 const router = (0, express_1.Router)();
