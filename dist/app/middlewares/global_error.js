@@ -25,6 +25,7 @@ const global_error = (err, req, res, next) => {
         status = err.statusCode;
         message = err.message;
     }
+    console.log(err);
     res.status(status).send({
         success,
         status,

@@ -35,18 +35,21 @@ enum PaymentMethod {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique @db.VarChar(20)
-  password  String
-  role      UserRole
-  status    UserStatus @default(ACTIVE)
-  isDeleted Boolean    @default(false)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  shop      Shop?
-  review    Review[]
-  order     Order[]
-  follow    Follow[]
+  id           String     @id @default(uuid())
+  name         String     @db.VarChar(255)
+  email        String     @unique @db.VarChar(255)
+  password     String
+  address      String?
+  profilePhoto String?
+  role         UserRole
+  status       UserStatus @default(ACTIVE)
+  isDeleted    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  shop         Shop?
+  review       Review[]
+  order        Order[]
+  follow       Follow[]
 
   @@map("users")
 }
@@ -62,6 +65,7 @@ model Shop {
   updatedAt   DateTime  @updatedAt
   product     Product[]
   follow      Follow[]
+  isDeleted   Boolean   @default(false)
 
   @@map("shops")
 }
@@ -72,6 +76,7 @@ model Category {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   productCategory ProductCategory[]
+  isDeleted       Boolean           @default(false)
 
   @@map("categories")
 }
@@ -87,6 +92,7 @@ model Product {
   description       String
   images            String
   discount          Float?
+  isDeleted         Boolean           @default(false)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   productCategory   ProductCategory[]
@@ -114,6 +120,7 @@ model Review {
   user       User     @relation(fields: [user_id], references: [id])
   rating     Int
   comment    String
+  isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -126,6 +133,7 @@ model Order {
   user         User           @relation(fields: [user_id], references: [id])
   total_price  Int
   status       OrderStatus    @default(PENDING)
+  isDeleted    Boolean        @default(false)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   orderProduct OrderProduct[]
@@ -142,6 +150,7 @@ model OrderProduct {
   product    Product  @relation(fields: [product_id], references: [id])
   quantity   Int
   price      Float
+  isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -153,6 +162,7 @@ model Follow {
   user      User     @relation(fields: [user_id], references: [id])
   shop_id   String
   shop      Shop     @relation(fields: [shop_id], references: [id])
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -167,6 +177,7 @@ model Transaction {
   amount         Float
   payment_method PaymentMethod
   status         PaymentStatus
+  isDeleted      Boolean       @default(false)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
