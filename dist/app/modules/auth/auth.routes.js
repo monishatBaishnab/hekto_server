@@ -9,6 +9,6 @@ const auth_controllers_1 = require("./auth.controllers");
 const upload_1 = require("../../middlewares/upload");
 const parse_json_1 = __importDefault(require("../../middlewares/parse_json"));
 const router = (0, express_1.Router)();
-router.post("/login");
+router.post("/login", auth_controllers_1.auth_controllers.login);
 router.post("/register", upload_1.multer_up.single("file"), parse_json_1.default, auth_controllers_1.auth_controllers.register);
 exports.auth_routes = router;

@@ -18,9 +18,21 @@ const http_status_1 = __importDefault(require("http-status"));
 const config_1 = require("../../config");
 const http_error_1 = __importDefault(require("../../errors/http_error"));
 const upload_1 = require("../../middlewares/upload");
-const prisma_client_1 = __importDefault(require("../../utils/prisma_client"));
+const prisma_1 = __importDefault(require("../../utils/prisma"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("../../utils/jsonwebtoken");
+const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user_info = yield prisma_1.default.user.findUniqueOrThrow({
+        where: { email: payload.email },
+    });
+    const is_match_pass = yield bcrypt_1.default.compare(payload.password, user_info.password);
+    if (!is_match_pass) {
+        throw new http_error_1.default(http_status_1.default.UNAUTHORIZED, "Password not matched.");
+    }
+    const token_data = (0, jsonwebtoken_1.sanitize_token_data)(user_info);
+    const token = (0, jsonwebtoken_1.generate_token)(token_data, config_1.local_config.user_jwt_secret);
+    return { token };
+});
 const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, function* () {
     if (payload.user.role === client_1.UserRole.ADMIN) {
         throw new http_error_1.default(http_status_1.default.UNAUTHORIZED, "You do not have permission.");
@@ -45,7 +57,7 @@ const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, fu
         const shop_data = Object.assign({}, payload.shop);
         shop_data.logo = uploaded_image_info === null || uploaded_image_info === void 0 ? void 0 : uploaded_image_info.secure_url;
         // Use a transaction to create the user and shop records together
-        created_user = yield prisma_client_1.default.$transaction((prisma_t) => __awaiter(void 0, void 0, void 0, function* () {
+        created_user = yield prisma_1.default.$transaction((prisma_t) => __awaiter(void 0, void 0, void 0, function* () {
             // Create the user and store the created user object
             const user = yield prisma_t.user.create({
                 data: user_data,
@@ -59,7 +71,7 @@ const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, fu
     }
     else {
         // For non-vendor users, simply create the user record
-        created_user = yield prisma_client_1.default.user.create({
+        created_user = yield prisma_1.default.user.create({
             data: user_data,
         });
     }
@@ -69,4 +81,5 @@ const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.auth_services = {
     register_into_db,
+    login
 };

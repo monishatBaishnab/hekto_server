@@ -2,6 +2,8 @@ import { Router } from "express";
 import { user_controllers } from "./user.controllers";
 import parse_json from "../../middlewares/parse_json";
 import { multer_up } from "../../middlewares/upload";
+import auth from "../../middlewares/auth";
+import { UserRole } from "@prisma/client";
 
 const router = Router();
 
@@ -12,7 +14,13 @@ router.get("/", user_controllers.fetch_all);
 router.get("/:id", user_controllers.fetch_single);
 
 // Route to create a new user
-router.post("/create-admin", multer_up.single("file"), parse_json, user_controllers.create_admin);
+router.post(
+  "/create-admin",
+  auth(UserRole.ADMIN),
+  multer_up.single("file"),
+  parse_json,
+  user_controllers.create_admin
+);
 
 // Route to update an existing user by ID
 router.put("/:id", user_controllers.update_one);

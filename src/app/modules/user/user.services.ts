@@ -3,7 +3,7 @@ import { TFile } from "../../types";
 import bcrypt from "bcrypt";
 import { local_config } from "../../config";
 import { cloudinary_uploader } from "../../middlewares/upload";
-import prisma from "../../utils/prisma_client";
+import prisma from "../../utils/prisma";
 import http_error from "../../errors/http_error";
 import httpStatus from "http-status";
 import { generate_token, sanitize_token_data } from "../../utils/jsonwebtoken";
@@ -33,8 +33,8 @@ const create_admin_into_db = async (payload: User, file: TFile) => {
   const token_data = sanitize_token_data(created_user);
 
   const token = generate_token(token_data, local_config.user_jwt_secret as Secret);
-  
-  return {token};
+
+  return { token };
 };
 
 const update_one_from_db = async (id: string, payload: Partial<User>) => {};

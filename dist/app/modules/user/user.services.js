@@ -16,7 +16,7 @@ exports.user_services = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const config_1 = require("../../config");
 const upload_1 = require("../../middlewares/upload");
-const prisma_client_1 = __importDefault(require("../../utils/prisma_client"));
+const prisma_1 = __importDefault(require("../../utils/prisma"));
 const jsonwebtoken_1 = require("../../utils/jsonwebtoken");
 const fetch_all_from_db = () => __awaiter(void 0, void 0, void 0, function* () { });
 const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function* () { });
@@ -30,7 +30,7 @@ const create_admin_into_db = (payload, file) => __awaiter(void 0, void 0, void 0
     if (uploaded_image_info === null || uploaded_image_info === void 0 ? void 0 : uploaded_image_info.secure_url) {
         user_data.profilePhoto = uploaded_image_info.secure_url;
     }
-    const created_user = yield prisma_client_1.default.user.create({
+    const created_user = yield prisma_1.default.user.create({
         data: user_data,
     });
     const token_data = (0, jsonwebtoken_1.sanitize_token_data)(created_user);
