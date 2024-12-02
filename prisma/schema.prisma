@@ -118,7 +118,7 @@ model Review {
   product    Product  @relation(fields: [product_id], references: [id])
   user_id    String
   user       User     @relation(fields: [user_id], references: [id])
-  rating     Int
+  rating     Float
   comment    String
   isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())

@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { TFile } from "../../types";
-import { Category, Product, UserRole } from "@prisma/client";
+import { Product, UserRole } from "@prisma/client";
 import prisma from "../../utils/prisma";
 import { cloudinary_uploader } from "../../middlewares/upload";
 import http_error from "../../errors/http_error";
