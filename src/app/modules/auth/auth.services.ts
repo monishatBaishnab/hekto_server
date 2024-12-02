@@ -1,4 +1,4 @@
-import { User, Shop, UserRole } from "@prisma/client";
+import { User, Shop, UserRole, UserStatus } from "@prisma/client";
 import httpStatus from "http-status";
 import { local_config } from "../../config";
 import http_error from "../../errors/http_error";
@@ -11,7 +11,7 @@ import { Secret } from "jsonwebtoken";
 
 const login = async (payload: { email: string; password: string }) => {
   const user_info = await prisma.user.findUniqueOrThrow({
-    where: { email: payload.email },
+    where: { email: payload.email, status: UserStatus.ACTIVE, isDeleted: false },
   });
 
   const is_match_pass = await bcrypt.compare(payload.password, user_info.password);
@@ -19,12 +19,12 @@ const login = async (payload: { email: string; password: string }) => {
   if (!is_match_pass) {
     throw new http_error(httpStatus.UNAUTHORIZED, "Password not matched.");
   }
-  
+
   const token_data = sanitize_token_data(user_info);
 
   const token = generate_token(token_data, local_config.user_jwt_secret as string);
 
-  return {token};
+  return { token };
 };
 
 const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFile) => {
@@ -90,5 +90,5 @@ const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFil
 
 export const auth_services = {
   register_into_db,
-  login
+  login,
 };

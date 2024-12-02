@@ -15,6 +15,7 @@ const global_error = (err: any, req: Request, res: Response, next: NextFunction)
       message = "Validation failed, check the input data for errors.";
     } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
       const prismaError = sanitize_prisma_error(err);
+
       message = prismaError.message;
       status = prismaError.statusCode;
     } else if (err instanceof http_error) {

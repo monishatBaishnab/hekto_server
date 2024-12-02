@@ -106,7 +106,7 @@ model ProductCategory {
   product_id  String
   product     Product  @relation(fields: [product_id], references: [id])
   category_id String
-  category    Category @relation(fields: [category_id], references: [id])
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
 
   @@id([product_id, category_id])
   @@map("products_categories")

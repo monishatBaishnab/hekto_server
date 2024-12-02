@@ -23,7 +23,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("../../utils/jsonwebtoken");
 const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user_info = yield prisma_1.default.user.findUniqueOrThrow({
-        where: { email: payload.email },
+        where: { email: payload.email, status: client_1.UserStatus.ACTIVE, isDeleted: false },
     });
     const is_match_pass = yield bcrypt_1.default.compare(payload.password, user_info.password);
     if (!is_match_pass) {
@@ -81,5 +81,5 @@ const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.auth_services = {
     register_into_db,
-    login
+    login,
 };

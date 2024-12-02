@@ -12,57 +12,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.product_controllers = void 0;
+exports.review_controllers = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const catch_async_1 = __importDefault(require("../../utils/catch_async"));
 const send_response_1 = __importDefault(require("../../utils/send_response"));
-const product_services_1 = require("./product.services");
-// Controller to fetch all Products
+// Controller to fetch all Reviews
 const fetch_all = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.fetch_all_from_db(req.query);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "Products retrieved successfully.",
-        data: result.products,
-        meta: result.meta,
+        message: "Reviews retrieved successfully.",
     });
 }));
-// Controller to fetch a single Product by ID
+// Controller to fetch a single Reviews by ID
 const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.fetch_single_from_db(req.params.id);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "Product retrieved successfully.",
-        data: result,
+        message: "Reviews retrieved successfully.",
     });
 }));
-// Controller to create a new Product
+// Controller to create a new Review
 const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.create_one_into_db(req.body, req.file, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.CREATED,
-        message: "Product created successfully.",
-        data: result,
+        message: "Review created successfully.",
     });
 }));
-// Controller to update an existing Product by ID
+// Controller to update an existing Reviews by ID
 const update_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.update_one_from_db(req.params.id, req.body, req.file, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "Product updated successfully.",
-        data: result,
+        message: "Reviews updated successfully.",
     });
 }));
-// Controller to delete an existing Product by ID
+// Controller to delete an existing Reviews by ID
 const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    yield product_services_1.product_services.delete_one_from_db(req.params.id, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
-        message: "Product deleted successfully.",
+        message: "Reviews deleted successfully.",
     });
 }));
-exports.product_controllers = {
+exports.review_controllers = {
     fetch_all,
     fetch_single,
     create_one,
