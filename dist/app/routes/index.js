@@ -3,7 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.app_routes = void 0;
 const express_1 = require("express");
 const user_routes_1 = require("../modules/user/user.routes");
+const auth_routes_1 = require("../modules/auth/auth.routes");
 const routes = [
+    {
+        path: "/auth",
+        element: auth_routes_1.auth_routes,
+    },
     {
         path: "/users",
         element: user_routes_1.user_routes,

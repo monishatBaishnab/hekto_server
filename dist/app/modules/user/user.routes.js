@@ -14,7 +14,7 @@ router.get("/", user_controllers_1.user_controllers.fetch_all);
 // Route to fetch a single user by ID
 router.get("/:id", user_controllers_1.user_controllers.fetch_single);
 // Route to create a new user
-router.post("/", upload_1.multer_up.single("file"), parse_json_1.default, user_controllers_1.user_controllers.create_one);
+router.post("/create-admin", upload_1.multer_up.single("file"), parse_json_1.default, user_controllers_1.user_controllers.create_admin);
 // Route to update an existing user by ID
 router.put("/:id", user_controllers_1.user_controllers.update_one);
 // Route to delete an existing user by ID

@@ -13,4 +13,6 @@ exports.local_config = {
     cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+    admin_jwt_secret: process.env.ADMIN_JWT_SECRET,
+    user_jwt_secret: process.env.USER_JWT_SECRET
 };

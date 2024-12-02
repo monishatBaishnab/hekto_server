@@ -20,12 +20,12 @@ const fetch_single = catch_async(async (req, res) => {
 });
 
 // Controller to create a new user
-const create_one = catch_async(async (req, res) => {
-  const result = await user_services.create_one_into_db(req.body, req.file);
+const create_admin = catch_async(async (req, res) => {
+  const result = await user_services.create_admin_into_db(req.body, req.file);
 
   send_response(res, {
     status: httpStatus.CREATED,
-    message: "User created successfully.",
+    message: "Admin created successfully.",
     data: result
   });
 });
@@ -49,7 +49,7 @@ const delete_one = catch_async(async (req, res) => {
 export const user_controllers = {
    fetch_all,
    fetch_single,
-   create_one,
+   create_admin,
    update_one,
    delete_one,
 };

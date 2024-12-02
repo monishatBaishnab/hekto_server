@@ -12,7 +12,7 @@ router.get("/", user_controllers.fetch_all);
 router.get("/:id", user_controllers.fetch_single);
 
 // Route to create a new user
-router.post("/", multer_up.single("file"), parse_json, user_controllers.create_one);
+router.post("/create-admin", multer_up.single("file"), parse_json, user_controllers.create_admin);
 
 // Route to update an existing user by ID
 router.put("/:id", user_controllers.update_one);

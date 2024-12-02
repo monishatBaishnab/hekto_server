@@ -32,11 +32,11 @@ const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, 
     });
 }));
 // Controller to create a new user
-const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_services_1.user_services.create_one_into_db(req.body, req.file);
+const create_admin = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_services_1.user_services.create_admin_into_db(req.body, req.file);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.CREATED,
-        message: "User created successfully.",
+        message: "Admin created successfully.",
         data: result
     });
 }));
@@ -57,7 +57,7 @@ const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, vo
 exports.user_controllers = {
     fetch_all,
     fetch_single,
-    create_one,
+    create_admin,
     update_one,
     delete_one,
 };
