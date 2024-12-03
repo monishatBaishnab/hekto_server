@@ -32,17 +32,25 @@ const http_status_1 = __importDefault(require("http-status"));
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const { min_price, max_price } = query !== null && query !== void 0 ? query : {};
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Build where conditions based on the query (e.g., filtering by 'name')
     const whereConditions = (0, wc_builder_1.default)(query, ["name"], ["name", "price"]);
+    const and_conditions = [
+        { AND: whereConditions },
+        { shop: { isDeleted: false } }, // Filter shops that are not deleted
+        {
+            price: {
+                gte: min_price ? Number(min_price) : 0,
+                lte: max_price ? Number(max_price) : 1000,
+            },
+        },
+    ];
     // Fetch products with conditions, pagination, sorting, and nested data
     const products = yield prisma_1.default.product.findMany({
         where: {
-            AND: [
-                { AND: whereConditions },
-                { shop: { isDeleted: false } }, // Filter shops that are not deleted
-            ],
+            AND: and_conditions,
         },
         skip: skip,
         take: limit,
@@ -62,7 +70,9 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
     });
     // Count total products matching the query (ignores pagination)
     const total = yield prisma_1.default.product.count({
-        where: { AND: whereConditions },
+        where: {
+            AND: and_conditions,
+        },
     });
     // Reshape data: transform productCategory into categories
     const filteredProducts = products.map((product) => (Object.assign(Object.assign({}, product), { categories: product.productCategory.map((pc) => pc.category), productCategory: undefined })));

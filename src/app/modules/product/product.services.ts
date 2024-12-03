@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { TFile } from "../../types";
-import { Product, UserRole } from "@prisma/client";
+import { Prisma, Product, UserRole } from "@prisma/client";
 import prisma from "../../utils/prisma";
 import { cloudinary_uploader } from "../../middlewares/upload";
 import http_error from "../../errors/http_error";
@@ -11,19 +11,28 @@ import wc_builder from "../../utils/wc_builder";
 type TProductCategories = { categories: { id: string; isDeleted: boolean }[] };
 
 const fetch_all_from_db = async (query: Record<string, unknown>) => {
+  const { min_price, max_price } = query ?? {};
   // Sanitize query parameters for pagination and sorting
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
 
   // Build where conditions based on the query (e.g., filtering by 'name')
   const whereConditions = wc_builder(query, ["name"], ["name", "price"]);
 
+  const and_conditions = [
+    { AND: whereConditions },
+    { shop: { isDeleted: false } }, // Filter shops that are not deleted
+    {
+      price: {
+        gte: min_price ? Number(min_price) : 0,
+        lte: max_price ? Number(max_price) : 1000,
+      },
+    },
+  ];
+
   // Fetch products with conditions, pagination, sorting, and nested data
   const products = await prisma.product.findMany({
     where: {
-      AND: [
-        { AND: whereConditions },
-        { shop: { isDeleted: false } }, // Filter shops that are not deleted
-      ],
+      AND: and_conditions,
     },
     skip: skip,
     take: limit,
@@ -44,7 +53,9 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
 
   // Count total products matching the query (ignores pagination)
   const total = await prisma.product.count({
-    where: { AND: whereConditions },
+    where: {
+      AND: and_conditions,
+    },
   });
 
   // Reshape data: transform productCategory into categories

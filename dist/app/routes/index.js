@@ -9,6 +9,7 @@ const review_routes_1 = require("../modules/review/review.routes");
 const product_routes_1 = require("../modules/product/product.routes");
 const payment_routes_1 = require("../modules/payment/payment.routes");
 const order_routes_1 = require("../modules/order/order.routes");
+const follow_routes_1 = require("../modules/follow/follow.routes");
 // Define all available routes and their corresponding route handlers
 const routes = [
     {
@@ -38,6 +39,10 @@ const routes = [
     {
         path: "/orders",
         element: order_routes_1.order_routes,
+    },
+    {
+        path: "/follows",
+        element: follow_routes_1.follow_routes,
     },
 ];
 // Create a new Express router instance

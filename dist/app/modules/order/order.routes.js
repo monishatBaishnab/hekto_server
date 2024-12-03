@@ -10,9 +10,9 @@ const auth_1 = __importDefault(require("../../middlewares/auth"));
 const client_1 = require("@prisma/client");
 const router = (0, express_1.Router)();
 // Route to fetch all orders
-router.get("/", (0, auth_1.default)(client_1.UserRole.ADMIN), order_controllers_1.order_controllers.fetch_all);
+router.get("/all", (0, auth_1.default)(client_1.UserRole.ADMIN), order_controllers_1.order_controllers.fetch_all);
 // Route to fetch my orders
-router.get("/my-orders", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR, client_1.UserRole.CUSTOMER), order_controllers_1.order_controllers.fetch_my);
+router.get("/", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR, client_1.UserRole.CUSTOMER), order_controllers_1.order_controllers.fetch_my);
 // Route to create a new order
 router.post("/", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR, client_1.UserRole.CUSTOMER), order_controllers_1.order_controllers.create_one);
 exports.order_routes = router;
