@@ -10,5 +10,8 @@ export const local_config = {
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
   admin_jwt_secret: process.env.ADMIN_JWT_SECRET,
-  user_jwt_secret: process.env.USER_JWT_SECRET
+  user_jwt_secret: process.env.USER_JWT_SECRET,
+  base_url: process.env.BASE_URL,
+  store_id: process.env.STORE_ID,
+  signature_key: process.env.SIGNATURE_KEY,
 };

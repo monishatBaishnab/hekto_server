@@ -16,8 +16,11 @@ CREATE TYPE "PaymentMethod" AS ENUM ('AMARPAY');
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
-    "email" VARCHAR(20) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "email" VARCHAR(255) NOT NULL,
     "password" TEXT NOT NULL,
+    "address" TEXT,
+    "profilePhoto" TEXT,
     "role" "UserRole" NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
@@ -36,6 +39,7 @@ CREATE TABLE "shops" (
     "logo" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "shops_pkey" PRIMARY KEY ("id")
 );
@@ -46,6 +50,7 @@ CREATE TABLE "categories" (
     "name" VARCHAR(255) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
 );
@@ -61,6 +66,7 @@ CREATE TABLE "products" (
     "description" TEXT NOT NULL,
     "images" TEXT NOT NULL,
     "discount" DOUBLE PRECISION,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -80,8 +86,9 @@ CREATE TABLE "reviews" (
     "id" TEXT NOT NULL,
     "product_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "rating" INTEGER NOT NULL,
+    "rating" DOUBLE PRECISION NOT NULL,
     "comment" TEXT NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -92,8 +99,12 @@ CREATE TABLE "reviews" (
 CREATE TABLE "orders" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
-    "total_price" INTEGER NOT NULL,
-    "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
+    "order_status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
+    "payment_status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "payment_method" "PaymentMethod" NOT NULL,
+    "transaction_id" TEXT NOT NULL,
+    "total_price" DOUBLE PRECISION NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -107,6 +118,7 @@ CREATE TABLE "order_products" (
     "product_id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -117,23 +129,11 @@ CREATE TABLE "order_products" (
 CREATE TABLE "followers" (
     "user_id" TEXT NOT NULL,
     "shop_id" TEXT NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "followers_pkey" PRIMARY KEY ("user_id","shop_id")
-);
-
--- CreateTable
-CREATE TABLE "transactions" (
-    "id" TEXT NOT NULL,
-    "order_id" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
-    "payment_method" "PaymentMethod" NOT NULL,
-    "status" "PaymentStatus" NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -141,9 +141,6 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "shops_user_id_key" ON "shops"("user_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "transactions_order_id_key" ON "transactions"("order_id");
 
 -- AddForeignKey
 ALTER TABLE "shops" ADD CONSTRAINT "shops_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -155,7 +152,7 @@ ALTER TABLE "products" ADD CONSTRAINT "products_shop_id_fkey" FOREIGN KEY ("shop
 ALTER TABLE "products_categories" ADD CONSTRAINT "products_categories_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products_categories" ADD CONSTRAINT "products_categories_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "products_categories" ADD CONSTRAINT "products_categories_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -167,16 +164,13 @@ ALTER TABLE "reviews" ADD CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_products" ADD CONSTRAINT "order_products_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "order_products" ADD CONSTRAINT "order_products_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_products" ADD CONSTRAINT "order_products_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "order_products" ADD CONSTRAINT "order_products_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "followers" ADD CONSTRAINT "followers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "followers" ADD CONSTRAINT "followers_shop_id_fkey" FOREIGN KEY ("shop_id") REFERENCES "shops"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

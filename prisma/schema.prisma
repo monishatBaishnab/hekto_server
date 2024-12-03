@@ -128,16 +128,18 @@ model Review {
 }
 
 model Order {
-  id           String         @id @default(uuid())
-  user_id      String
-  user         User           @relation(fields: [user_id], references: [id])
-  total_price  Int
-  status       OrderStatus    @default(PENDING)
-  isDeleted    Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  orderProduct OrderProduct[]
-  transaction  Transaction?
+  id             String         @id @default(uuid())
+  user_id        String
+  user           User           @relation(fields: [user_id], references: [id])
+  order_status   OrderStatus    @default(PENDING)
+  payment_status PaymentStatus  @default(PENDING)
+  payment_method PaymentMethod
+  transaction_id String
+  total_price    Float
+  isDeleted      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  orderProduct   OrderProduct[]
 
   @@map("orders")
 }
@@ -145,9 +147,9 @@ model Order {
 model OrderProduct {
   id         String   @id @default(uuid())
   order_id   String
-  order      Order    @relation(fields: [order_id], references: [id])
+  order      Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
   product_id String
-  product    Product  @relation(fields: [product_id], references: [id])
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   quantity   Int
   price      Float
   isDeleted  Boolean  @default(false)
@@ -168,18 +170,4 @@ model Follow {
 
   @@id([user_id, shop_id])
   @@map("followers")
-}
-
-model Transaction {
-  id             String        @id @default(uuid())
-  order_id       String        @unique
-  order          Order         @relation(fields: [order_id], references: [id])
-  amount         Float
-  payment_method PaymentMethod
-  status         PaymentStatus
-  isDeleted      Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  @@map("transactions")
 }

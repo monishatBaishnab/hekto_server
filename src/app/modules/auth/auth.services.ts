@@ -46,7 +46,7 @@ const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFil
   if (uploaded_image_info?.secure_url) {
     user_data.profilePhoto = uploaded_image_info.secure_url;
   }
-
+  
   let created_user;
 
   // Check if the user's role is 'VENDOR'
