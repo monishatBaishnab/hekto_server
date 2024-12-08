@@ -1,4 +1,4 @@
-import express, { Application} from "express";
+import express, { Application } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import send_response from "./app/utils/send_response";
@@ -20,7 +20,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["*"],
+    origin: ["*", "http://localhost:5173"],
   })
 );
 

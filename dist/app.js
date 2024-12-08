@@ -21,7 +21,7 @@ app.use((0, cookie_parser_1.default)());
 // Enable Cross-Origin Resource Sharing (CORS) with specified options
 app.use((0, cors_1.default)({
     credentials: true,
-    origin: ["*"],
+    origin: ["*", "http://localhost:5173"],
 }));
 // Define a GET route for the root URL
 app.get("/", (0, catch_async_1.default)((req, res) => {

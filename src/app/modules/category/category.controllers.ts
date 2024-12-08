@@ -25,7 +25,7 @@ const fetch_single = catch_async(async (req, res) => {
 
 // Controller to create a new Category as 'ADMIN'
 const create_one = catch_async(async (req, res) => {
-  const result = await category_services.create_one_into_db(req.body);
+  const result = await category_services.create_one_into_db(req.body, req.file);
 
   send_response(res, {
     status: httpStatus.CREATED,

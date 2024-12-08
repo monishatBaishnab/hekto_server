@@ -16,6 +16,7 @@ exports.category_services = void 0;
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
+const upload_1 = require("../../middlewares/upload");
 // Fetch all categories with pagination, sorting, and filtering
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
     // Sanitize query parameters for pagination and sorting
@@ -47,7 +48,11 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
     return category;
 });
 // Create a new category in the database
-const create_one_into_db = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const create_one_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, function* () {
+    const upload_file = yield (0, upload_1.cloudinary_uploader)(file);
+    if (upload_file === null || upload_file === void 0 ? void 0 : upload_file.secure_url) {
+        payload.image = upload_file.secure_url;
+    }
     // Create a new category using the provided payload data
     const created_category = yield prisma_1.default.category.create({
         data: payload,

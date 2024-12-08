@@ -2,6 +2,8 @@ import { Category } from "@prisma/client";
 import prisma from "../../utils/prisma";
 import sanitize_paginate from "../../utils/sanitize_paginate";
 import wc_builder from "../../utils/wc_builder";
+import { TFile } from "../../types";
+import { cloudinary_uploader } from "../../middlewares/upload";
 
 // Fetch all categories with pagination, sorting, and filtering
 const fetch_all_from_db = async (query: Record<string, unknown>) => {
@@ -41,7 +43,13 @@ const fetch_single_from_db = async (id: string) => {
 };
 
 // Create a new category in the database
-const create_one_into_db = async (payload: Category) => {
+const create_one_into_db = async (payload: Category, file: TFile) => {
+  const upload_file = await cloudinary_uploader(file);
+
+  if (upload_file?.secure_url) {
+    payload.image = upload_file.secure_url;
+  }
+
   // Create a new category using the provided payload data
   const created_category = await prisma.category.create({
     data: payload,

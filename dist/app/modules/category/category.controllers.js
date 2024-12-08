@@ -36,7 +36,7 @@ const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, 
 }));
 // Controller to create a new Category as 'ADMIN'
 const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield category_services_1.category_services.create_one_into_db(req.body);
+    const result = yield category_services_1.category_services.create_one_into_db(req.body, req.file);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.CREATED,
         message: "Category created successfully.",
