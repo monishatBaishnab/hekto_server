@@ -31,12 +31,15 @@ const http_error_1 = __importDefault(require("../../errors/http_error"));
 const http_status_1 = __importDefault(require("http-status"));
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
+const sanitize_queries_1 = __importDefault(require("../../utils/sanitize_queries"));
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const { min_price, max_price } = query !== null && query !== void 0 ? query : {};
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Build where conditions based on the query (e.g., filtering by 'name')
-    const whereConditions = (0, wc_builder_1.default)(query, ["name"], ["name", "price"]);
+    const whereConditions = (0, wc_builder_1.default)(query, ["name"], ["name", "shop_id"]);
+    const { categories: categoriesStr } = (0, sanitize_queries_1.default)(query, ["categories"]) || {};
+    const categories = (categoriesStr === null || categoriesStr === void 0 ? void 0 : categoriesStr.split(", ").map((str) => str.trim()).filter((category) => category !== "")) || [];
     const and_conditions = [
         { AND: whereConditions },
         { shop: { isDeleted: false } }, // Filter shops that are not deleted
@@ -46,11 +49,24 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
                 lte: max_price ? Number(max_price) : 1000,
             },
         },
+        ...(categories.length > 0
+            ? [
+                {
+                    productCategory: {
+                        some: {
+                            OR: categories.map((category) => ({
+                                category_id: { contains: category },
+                            })),
+                        },
+                    },
+                },
+            ]
+            : []),
     ];
     // Fetch products with conditions, pagination, sorting, and nested data
     const products = yield prisma_1.default.product.findMany({
         where: {
-            AND: and_conditions,
+            AND: [{ AND: and_conditions }],
         },
         skip: skip,
         take: limit,
@@ -64,6 +80,12 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
                     id: true,
                     name: true,
                     logo: true,
+                    createdAt: true,
+                },
+            },
+            review: {
+                select: {
+                    rating: true,
                 },
             },
         },
@@ -109,7 +131,7 @@ const create_one_into_db = (data, file, user) => __awaiter(void 0, void 0, void 
         throw new http_error_1.default(http_status_1.default.BAD_REQUEST, "Please select an image.");
     }
     // Prepare product data and set available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { availableQuantity: payload.quantity });
+    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
     // Retrieve shop information for the authenticated user
     const shop_info = yield prisma_1.default.shop.findUniqueOrThrow({
         where: { user_id: user.id, isDeleted: false },
@@ -154,7 +176,7 @@ const update_one_from_db = (id, data, file, user) => __awaiter(void 0, void 0, v
     }
     const _a = data !== null && data !== void 0 ? data : {}, { categories } = _a, payload = __rest(_a, ["categories"]);
     // Prepare product data, including available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { availableQuantity: payload.quantity });
+    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
     // Upload product image to Cloudinary and add the URL to product data
     const uploaded_image = yield (0, upload_1.cloudinary_uploader)(file);
     if (uploaded_image === null || uploaded_image === void 0 ? void 0 : uploaded_image.secure_url) {

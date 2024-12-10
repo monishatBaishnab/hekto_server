@@ -47,6 +47,22 @@ const fetch_single_from_db = async (id: string) => {
   // Retrieve user details, ensuring the record is not marked as deleted
   const user_info = await prisma.user.findUniqueOrThrow({
     where: { id, isDeleted: false },
+    select: {
+      password: false,
+      id: true,
+      name: true,
+      email: true,
+      profilePhoto: true,
+      address: true,
+      role: true,
+      shop: {
+        select: {
+          name: true,
+          id: true,
+          description: true,
+        },
+      },
+    },
   });
 
   return user_info;
@@ -121,7 +137,7 @@ const update_status_from_db = async (id: string, payload: { status: UserStatus }
   await prisma.user.findUniqueOrThrow({
     where: { id },
   });
-  
+
   await prisma.user.update({
     where: { id },
     data: {

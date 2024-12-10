@@ -53,6 +53,22 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
     // Retrieve user details, ensuring the record is not marked as deleted
     const user_info = yield prisma_1.default.user.findUniqueOrThrow({
         where: { id, isDeleted: false },
+        select: {
+            password: false,
+            id: true,
+            name: true,
+            email: true,
+            profilePhoto: true,
+            address: true,
+            role: true,
+            shop: {
+                select: {
+                    name: true,
+                    id: true,
+                    description: true,
+                },
+            },
+        },
     });
     return user_info;
 });

@@ -7,6 +7,7 @@ import http_error from "../../errors/http_error";
 import httpStatus from "http-status";
 import sanitize_paginate from "../../utils/sanitize_paginate";
 import wc_builder from "../../utils/wc_builder";
+import sanitize_queries from "../../utils/sanitize_queries";
 
 type TProductCategories = { categories: { id: string; isDeleted: boolean }[] };
 
@@ -16,7 +17,14 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
 
   // Build where conditions based on the query (e.g., filtering by 'name')
-  const whereConditions = wc_builder(query, ["name"], ["name", "price"]);
+  const whereConditions = wc_builder(query, ["name"], ["name", "shop_id"]);
+  const { categories: categoriesStr } = sanitize_queries(query, ["categories"]) || {};
+
+  const categories =
+    (categoriesStr as string)
+      ?.split(", ")
+      .map((str) => str.trim())
+      .filter((category) => category !== "") || [];
 
   const and_conditions = [
     { AND: whereConditions },
@@ -27,12 +35,25 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
         lte: max_price ? Number(max_price) : 1000,
       },
     },
+    ...(categories.length > 0
+      ? [
+          {
+            productCategory: {
+              some: {
+                OR: categories.map((category) => ({
+                  category_id: { contains: category },
+                })),
+              },
+            },
+          },
+        ]
+      : []),
   ];
 
   // Fetch products with conditions, pagination, sorting, and nested data
   const products = await prisma.product.findMany({
     where: {
-      AND: and_conditions,
+      AND: [{ AND: and_conditions }],
     },
     skip: skip,
     take: limit,
@@ -46,6 +67,12 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
           id: true,
           name: true,
           logo: true,
+          createdAt: true,
+        },
+      },
+      review: {
+        select: {
+          rating: true,
         },
       },
     },
@@ -106,7 +133,12 @@ const create_one_into_db = async (
   }
 
   // Prepare product data and set available quantity
-  const shop_data = { ...payload, availableQuantity: payload.quantity };
+  const shop_data = {
+    ...payload,
+    price: Number(payload.price),
+    quantity: Number(payload.quantity),
+    availableQuantity: Number(payload.quantity),
+  };
 
   // Retrieve shop information for the authenticated user
   const shop_info = await prisma.shop.findUniqueOrThrow({
@@ -163,7 +195,12 @@ const update_one_from_db = async (
 
   const { categories, ...payload } = data ?? {};
   // Prepare product data, including available quantity
-  const shop_data = { ...payload, availableQuantity: payload.quantity };
+  const shop_data = {
+    ...payload,
+    price: Number(payload.price),
+    quantity: Number(payload.quantity),
+    availableQuantity: Number(payload.quantity),
+  };
 
   // Upload product image to Cloudinary and add the URL to product data
   const uploaded_image = await cloudinary_uploader(file);

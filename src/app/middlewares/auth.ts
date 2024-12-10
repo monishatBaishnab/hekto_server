@@ -7,6 +7,7 @@ import httpStatus from "http-status";
 
 const auth = (...roles: string[]) => {
   return catch_async((req: Request, res: Response, next: NextFunction) => {
+
     const token = req?.headers?.authorization;
     if (!token) {
       console.log(token);
