@@ -7,12 +7,13 @@ import sanitize_paginate from "../../utils/sanitize_paginate";
 
 // Fetch All reviews from database with pagination
 const fetch_all_from_db = async (query: Record<string, unknown>) => {
+  const { shop_id } = query;
   // Sanitize query parameters for pagination and sorting
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
 
   // Fetch reviews from the database with the applied conditions, pagination, and sorting
   const reviews = await prisma.review.findMany({
-    where: {isDeleted: false},
+    where: { isDeleted: false, product: { shop_id: shop_id as string } },
     skip: skip,
     take: limit,
     orderBy: { [sortBy]: sortOrder },
@@ -20,7 +21,8 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
       id: true,
       rating: true,
       comment: true,
-      user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true } },
+      user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true, createdAt:true } },
+      product: { select: { name: true } },
     },
   });
 

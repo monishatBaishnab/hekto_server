@@ -20,11 +20,12 @@ const http_status_1 = __importDefault(require("http-status"));
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 // Fetch All reviews from database with pagination
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const { shop_id } = query;
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Fetch reviews from the database with the applied conditions, pagination, and sorting
     const reviews = yield prisma_1.default.review.findMany({
-        where: { isDeleted: false },
+        where: { isDeleted: false, product: { shop_id: shop_id } },
         skip: skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
@@ -32,7 +33,8 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
             id: true,
             rating: true,
             comment: true,
-            user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true } },
+            user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true, createdAt: true } },
+            product: { select: { name: true } },
         },
     });
     const total = yield prisma_1.default.review.count();

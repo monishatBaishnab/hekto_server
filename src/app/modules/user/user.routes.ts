@@ -29,7 +29,7 @@ router.post(
 // Route to update an existing user by ID
 router.put(
   "/:id",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.ADMIN, UserRole.CUSTOMER),
   multer_up.single("file"),
   parse_json,
   user_controllers.update_one

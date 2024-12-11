@@ -9,6 +9,7 @@ const auth = (...roles: string[]) => {
   return catch_async((req: Request, res: Response, next: NextFunction) => {
 
     const token = req?.headers?.authorization;
+    console.log(token);
     if (!token) {
       console.log(token);
       throw new http_error(httpStatus.UNAUTHORIZED, "You are not authorized.");

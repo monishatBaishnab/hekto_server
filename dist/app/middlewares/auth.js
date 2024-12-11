@@ -12,6 +12,7 @@ const auth = (...roles) => {
     return (0, catch_async_1.default)((req, res, next) => {
         var _a;
         const token = (_a = req === null || req === void 0 ? void 0 : req.headers) === null || _a === void 0 ? void 0 : _a.authorization;
+        console.log(token);
         if (!token) {
             console.log(token);
             throw new http_error_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized.");

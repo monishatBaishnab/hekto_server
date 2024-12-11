@@ -18,7 +18,7 @@ router.get("/:id", (0, auth_1.default)(client_1.UserRole.CUSTOMER, client_1.User
 // Route to create a new user as 'ADMIN'
 router.post("/create-admin", (0, auth_1.default)(client_1.UserRole.ADMIN), upload_1.multer_up.single("file"), parse_json_1.default, user_controllers_1.user_controllers.create_admin);
 // Route to update an existing user by ID
-router.put("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN), upload_1.multer_up.single("file"), parse_json_1.default, user_controllers_1.user_controllers.update_one);
+router.put("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.ADMIN, client_1.UserRole.CUSTOMER), upload_1.multer_up.single("file"), parse_json_1.default, user_controllers_1.user_controllers.update_one);
 // Route to update an existing user status by ID
 router.put("/status/:id", (0, auth_1.default)(client_1.UserRole.ADMIN), user_controllers_1.user_controllers.update_status);
 // Route to delete an existing user by ID
