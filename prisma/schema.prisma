@@ -12,6 +12,11 @@ enum UserStatus {
   BLOCKED
 }
 
+enum ShopStatus {
+  ACTIVE
+  BLOCKED
+}
+
 enum UserRole {
   CUSTOMER
   VENDOR
@@ -55,17 +60,18 @@ model User {
 }
 
 model Shop {
-  id          String    @id @default(uuid())
-  user_id     String    @unique
-  user        User      @relation(fields: [user_id], references: [id])
-  name        String    @db.VarChar(255)
+  id          String     @id @default(uuid())
+  user_id     String     @unique
+  user        User       @relation(fields: [user_id], references: [id])
+  name        String     @db.VarChar(255)
   description String
   logo        String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  status      ShopStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   product     Product[]
   follow      Follow[]
-  isDeleted   Boolean   @default(false)
+  isDeleted   Boolean    @default(false)
 
   @@map("shops")
 }

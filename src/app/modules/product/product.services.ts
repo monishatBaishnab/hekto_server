@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { TFile } from "../../types";
-import { Prisma, Product, UserRole } from "@prisma/client";
+import { Product, UserRole } from "@prisma/client";
 import prisma from "../../utils/prisma";
 import { cloudinary_uploader } from "../../middlewares/upload";
 import http_error from "../../errors/http_error";
@@ -81,7 +81,7 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
   // Count total products matching the query (ignores pagination)
   const total = await prisma.product.count({
     where: {
-      AND: and_conditions,
+      AND: [{ AND: and_conditions, shop: { status: "ACTIVE" } }],
     },
   });
 
@@ -136,6 +136,7 @@ const create_one_into_db = async (
   const shop_data = {
     ...payload,
     price: Number(payload.price),
+    discount: Number(payload.discount),
     quantity: Number(payload.quantity),
     availableQuantity: Number(payload.quantity),
   };
@@ -197,6 +198,7 @@ const update_one_from_db = async (
   // Prepare product data, including available quantity
   const shop_data = {
     ...payload,
+    discount: Number(payload.discount),
     price: Number(payload.price),
     quantity: Number(payload.quantity),
     availableQuantity: Number(payload.quantity),

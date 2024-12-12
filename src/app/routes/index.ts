@@ -7,6 +7,7 @@ import { product_routes } from "../modules/product/product.routes";
 import { payment_routes } from "../modules/payment/payment.routes";
 import { order_routes } from "../modules/order/order.routes";
 import { follow_routes } from "../modules/follow/follow.routes";
+import { shop_routes } from "../modules/shop/shop.routes";
 
 // Define all available routes and their corresponding route handlers
 const routes = [
@@ -41,6 +42,10 @@ const routes = [
   {
     path: "/follows",
     element: follow_routes,
+  },
+  {
+    path: "/shops",
+    element: shop_routes,
   },
 ];
 

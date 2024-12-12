@@ -66,6 +66,7 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
                     name: true,
                     id: true,
                     description: true,
+                    logo: true,
                 },
             },
         },
@@ -124,12 +125,27 @@ const update_status_from_db = (id, payload) => __awaiter(void 0, void 0, void 0,
     yield prisma_1.default.user.findUniqueOrThrow({
         where: { id },
     });
-    yield prisma_1.default.user.update({
-        where: { id },
-        data: {
+    let user_data = {};
+    if (payload === null || payload === void 0 ? void 0 : payload.status) {
+        user_data = {
             status: payload.status,
             isDeleted: payload.status === client_1.UserStatus.BLOCKED ? true : false,
-        },
+        };
+    }
+    if (payload === null || payload === void 0 ? void 0 : payload.role) {
+        user_data = {
+            role: payload.role,
+        };
+    }
+    if (payload === null || payload === void 0 ? void 0 : payload.isDeleted) {
+        user_data = {
+            isDeleted: true,
+        };
+    }
+    console.log(user_data);
+    yield prisma_1.default.user.update({
+        where: { id },
+        data: user_data,
     });
     return;
 });

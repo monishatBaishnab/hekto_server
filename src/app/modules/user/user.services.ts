@@ -1,4 +1,4 @@
-import { User, UserStatus } from "@prisma/client";
+import { User, UserRole, UserStatus } from "@prisma/client";
 import { TFile } from "../../types";
 import bcrypt from "bcrypt";
 import { local_config } from "../../config";
@@ -60,6 +60,7 @@ const fetch_single_from_db = async (id: string) => {
           name: true,
           id: true,
           description: true,
+          logo: true,
         },
       },
     },
@@ -132,18 +133,38 @@ const update_one_from_db = async (
 };
 
 // Service for update status a user
-const update_status_from_db = async (id: string, payload: { status: UserStatus }) => {
+const update_status_from_db = async (
+  id: string,
+  payload: { isDeleted: boolean; status: UserStatus; role: UserRole }
+) => {
   // Ensure user exists and matches the logged-in user
   await prisma.user.findUniqueOrThrow({
     where: { id },
   });
 
-  await prisma.user.update({
-    where: { id },
-    data: {
+  let user_data = {};
+
+  if (payload?.status) {
+    user_data = {
       status: payload.status,
       isDeleted: payload.status === UserStatus.BLOCKED ? true : false,
-    },
+    };
+  }
+  if (payload?.role) {
+    user_data = {
+      role: payload.role,
+    };
+  }
+
+  if (payload?.isDeleted) {
+    user_data = {
+      isDeleted: true,
+    };
+  }
+  console.log(user_data);
+  await prisma.user.update({
+    where: { id },
+    data: user_data,
   });
 
   return;

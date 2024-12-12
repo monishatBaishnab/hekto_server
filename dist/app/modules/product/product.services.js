@@ -93,7 +93,7 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
     // Count total products matching the query (ignores pagination)
     const total = yield prisma_1.default.product.count({
         where: {
-            AND: and_conditions,
+            AND: [{ AND: and_conditions, shop: { status: "ACTIVE" } }],
         },
     });
     // Reshape data: transform productCategory into categories
@@ -131,7 +131,7 @@ const create_one_into_db = (data, file, user) => __awaiter(void 0, void 0, void 
         throw new http_error_1.default(http_status_1.default.BAD_REQUEST, "Please select an image.");
     }
     // Prepare product data and set available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
+    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), discount: Number(payload.discount), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
     // Retrieve shop information for the authenticated user
     const shop_info = yield prisma_1.default.shop.findUniqueOrThrow({
         where: { user_id: user.id, isDeleted: false },
@@ -176,7 +176,7 @@ const update_one_from_db = (id, data, file, user) => __awaiter(void 0, void 0, v
     }
     const _a = data !== null && data !== void 0 ? data : {}, { categories } = _a, payload = __rest(_a, ["categories"]);
     // Prepare product data, including available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
+    const shop_data = Object.assign(Object.assign({}, payload), { discount: Number(payload.discount), price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
     // Upload product image to Cloudinary and add the URL to product data
     const uploaded_image = yield (0, upload_1.cloudinary_uploader)(file);
     if (uploaded_image === null || uploaded_image === void 0 ? void 0 : uploaded_image.secure_url) {
