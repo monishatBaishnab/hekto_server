@@ -48,7 +48,7 @@ const create_one_into_db = (payload, user) => __awaiter(void 0, void 0, void 0, 
     // Ensure the user exists and is not deleted
     yield prisma_1.default.user.findUniqueOrThrow({ where: { id: user.id, isDeleted: false } });
     // Prepare review data with the user ID
-    const review_data = Object.assign(Object.assign({}, payload), { user_id: user.id });
+    const review_data = Object.assign(Object.assign({}, payload), { rating: Number(payload.rating), user_id: user.id });
     // Create and save the review
     const created_review = yield prisma_1.default.review.create({
         data: review_data,

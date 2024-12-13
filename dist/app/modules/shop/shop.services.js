@@ -48,6 +48,11 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
     // Find a unique shop by ID, throwing an error if not found
     const shop = yield prisma_1.default.shop.findUniqueOrThrow({
         where: { id, isDeleted: false },
+        include: {
+            follow: {
+                select: { user_id: true },
+            },
+        },
     });
     // Return the found shop
     return shop;

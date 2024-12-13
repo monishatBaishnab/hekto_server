@@ -24,7 +24,7 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
     orderBy: { [sortBy]: sortOrder },
     include: {
       user: {
-        select: { name: true, email: true, role:true },
+        select: { name: true, email: true, role: true },
       },
     },
   });
@@ -41,6 +41,11 @@ const fetch_single_from_db = async (id: string) => {
   // Find a unique shop by ID, throwing an error if not found
   const shop = await prisma.shop.findUniqueOrThrow({
     where: { id, isDeleted: false },
+    include: {
+      follow: {
+        select: { user_id: true },
+      },
+    },
   });
 
   // Return the found shop

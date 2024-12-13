@@ -20,7 +20,12 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["*", "http://localhost:5173"],
+    origin: [
+      "*",
+      "http://localhost:5173",
+      "https://hekto-1a747.firebaseapp.com",
+      "https://hekto-1a747.web.app",
+    ],
   })
 );
 

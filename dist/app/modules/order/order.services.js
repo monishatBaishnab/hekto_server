@@ -27,7 +27,6 @@ exports.order_services = void 0;
 const client_1 = require("@prisma/client");
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const payment_utils_1 = require("../payment/payment.utils");
-const order_utils_1 = require("./order.utils");
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
 const order_filterable_filds = ["payment_method", "payment_status", "order_status"];
@@ -60,16 +59,13 @@ const fetch_my_from_db = (query, user) => __awaiter(void 0, void 0, void 0, func
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Build where conditions based on the query (e.g., filtering by "payment_method", "payment_status", "order_status")
     const whereConditions = (0, wc_builder_1.default)(query, [], order_filterable_filds);
+    const { shop_id } = query;
     // Fetch orders from the database with the applied conditions, pagination, and sorting
     const orders = yield prisma_1.default.order.findMany({
         where: {
             AND: [
-                {
-                    AND: whereConditions,
-                },
-                {
-                    user_id: user.id,
-                },
+                ...whereConditions, // Ensure whereConditions is correctly formed as an array
+                shop_id ? { orderProduct: { some: { product: { shop_id } } } } : { user_id: user.id },
             ],
         },
         skip: skip,
@@ -81,21 +77,29 @@ const fetch_my_from_db = (query, user) => __awaiter(void 0, void 0, void 0, func
         },
     });
     const total = yield prisma_1.default.order.count({
-        where: { AND: whereConditions },
+        where: {
+            AND: [
+                {
+                    AND: whereConditions,
+                },
+                {
+                    user_id: user.id,
+                },
+            ],
+        },
     });
     // Return the list of orders
     return { orders: orders, meta: { limit, page, total } };
 });
 const create_one_into_db = (data, user) => __awaiter(void 0, void 0, void 0, function* () {
-    const _a = data !== null && data !== void 0 ? data : {}, { products } = _a, payload = __rest(_a, ["products"]);
+    const _a = data !== null && data !== void 0 ? data : {}, { products, total_price: t_price } = _a, payload = __rest(_a, ["products", "total_price"]);
     const user_info = yield prisma_1.default.user.findUniqueOrThrow({
         where: { id: user.id },
     });
     const trans_id = (0, payment_utils_1.generate_tran_id)();
-    const total_price = (0, order_utils_1.calculate_total_price)(products);
     const payment_data = {
         trans_id,
-        amount: total_price,
+        amount: t_price,
         customer: { name: user_info.name, email: user_info.email },
     };
     const payment = yield (0, payment_utils_1.initiate_payment)(payment_data);
@@ -104,7 +108,7 @@ const create_one_into_db = (data, user) => __awaiter(void 0, void 0, void 0, fun
             payment_method: client_1.PaymentMethod.AMARPAY,
             transaction_id: trans_id,
             user_id: user_info.id,
-            total_price,
+            total_price: t_price,
         };
         const created_order = yield prisma_t.order.create({
             data: order_data,

@@ -14,22 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cloudinary_uploader = exports.multer_up = void 0;
 const multer_1 = __importDefault(require("multer"));
-const path_1 = __importDefault(require("path"));
 const cloudinary_1 = require("cloudinary");
-const fs_1 = __importDefault(require("fs"));
 const config_1 = require("../config");
+const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 cloudinary_1.v2.config({
     cloud_name: config_1.local_config.cloudinary_cloud_name,
     api_key: config_1.local_config.cloudinary_api_key,
     api_secret: config_1.local_config.cloudinary_api_secret,
 });
-const storage = multer_1.default.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path_1.default.join(process.cwd(), "/upload"));
-    },
-    filename: function (req, file, cb) {
-        cb(null, `hekto-${Date.now()}.${file.originalname.split(".").pop()}`);
-    },
+const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
+    cloudinary: cloudinary_1.v2,
 });
 exports.multer_up = (0, multer_1.default)({ storage: storage });
 const cloudinary_uploader = (file) => __awaiter(void 0, void 0, void 0, function* () {
@@ -37,7 +31,6 @@ const cloudinary_uploader = (file) => __awaiter(void 0, void 0, void 0, function
         return;
     return new Promise((resolve, reject) => {
         cloudinary_1.v2.uploader.upload(file.path, (error, result) => {
-            fs_1.default.unlinkSync(file.path);
             if (error) {
                 reject(error);
             }

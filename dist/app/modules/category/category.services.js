@@ -31,6 +31,13 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
         skip: skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
+        include: {
+            productCategory: {
+                select: {
+                    product: { select: { _count: true } },
+                },
+            },
+        },
     });
     const total = yield prisma_1.default.category.count({
         where: { AND: whereConditions },

@@ -21,6 +21,13 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
     skip: skip,
     take: limit,
     orderBy: { [sortBy]: sortOrder },
+    include: {
+      productCategory: {
+        select: {
+          product: { select: { _count: true } },
+        },
+      },
+    },
   });
 
   const total = await prisma.category.count({

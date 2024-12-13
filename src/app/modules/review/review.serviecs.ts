@@ -41,7 +41,7 @@ const create_one_into_db = async (payload: Review, user: JwtPayload) => {
   await prisma.user.findUniqueOrThrow({ where: { id: user.id, isDeleted: false } });
 
   // Prepare review data with the user ID
-  const review_data = { ...payload, user_id: user.id };
+  const review_data = { ...payload, rating: Number(payload.rating), user_id: user.id };
 
   // Create and save the review
   const created_review = await prisma.review.create({

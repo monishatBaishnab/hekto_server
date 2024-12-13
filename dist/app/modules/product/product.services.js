@@ -116,6 +116,32 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
                     logo: true,
                 },
             },
+            review: {
+                select: {
+                    id: true,
+                    rating: true,
+                    comment: true,
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            profilePhoto: true,
+                            createdAt: true,
+                        },
+                    },
+                    product: { select: { name: true } },
+                },
+            },
+            // OrderProduct: {
+            //   select: {
+            //     order: {
+            //       select: {
+            //         user_id: true,
+            //       },
+            //     },
+            //   },
+            // },
         },
     });
     // Extract and reshape product categories

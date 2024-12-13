@@ -44,17 +44,13 @@ const fetch_my_from_db = async (query: Record<string, unknown>, user: JwtPayload
 
   // Build where conditions based on the query (e.g., filtering by "payment_method", "payment_status", "order_status")
   const whereConditions = wc_builder(query, [], order_filterable_filds);
-
+  const { shop_id } = query;
   // Fetch orders from the database with the applied conditions, pagination, and sorting
   const orders = await prisma.order.findMany({
     where: {
       AND: [
-        {
-          AND: whereConditions,
-        },
-        {
-          user_id: user.id,
-        },
+        ...whereConditions, // Ensure whereConditions is correctly formed as an array
+        shop_id ? { orderProduct: { some: { product: { shop_id } } } } : { user_id: user.id },
       ],
     },
     skip: skip,
@@ -67,7 +63,16 @@ const fetch_my_from_db = async (query: Record<string, unknown>, user: JwtPayload
   });
 
   const total = await prisma.order.count({
-    where: { AND: whereConditions },
+    where: {
+      AND: [
+        {
+          AND: whereConditions,
+        },
+        {
+          user_id: user.id,
+        },
+      ],
+    },
   });
 
   // Return the list of orders
@@ -75,17 +80,16 @@ const fetch_my_from_db = async (query: Record<string, unknown>, user: JwtPayload
 };
 
 const create_one_into_db = async (data: Order & TOrderProducts, user: JwtPayload) => {
-  const { products, ...payload } = data ?? {};
+  const { products, total_price: t_price, ...payload } = data ?? {};
   const user_info = await prisma.user.findUniqueOrThrow({
     where: { id: user.id },
   });
 
   const trans_id = generate_tran_id();
-  const total_price = calculate_total_price(products);
 
   const payment_data = {
     trans_id,
-    amount: total_price,
+    amount: t_price,
     customer: { name: user_info.name, email: user_info.email },
   };
 
@@ -96,7 +100,7 @@ const create_one_into_db = async (data: Order & TOrderProducts, user: JwtPayload
       payment_method: PaymentMethod.AMARPAY,
       transaction_id: trans_id,
       user_id: user_info.id,
-      total_price,
+      total_price: t_price,
     };
 
     const created_order = await prisma_t.order.create({
