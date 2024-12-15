@@ -4,14 +4,37 @@ import send_response from "../../utils/send_response";
 import { auth_services } from "./auth.services";
 
 const login = catch_async(async (req, res) => {
-    const result = await auth_services.login(req.body);
+  const result = await auth_services.login(req.body);
 
   send_response(res, {
     status: httpStatus.OK,
     message: "User logged in successfully.",
     data: result,
   });
-})
+});
+
+const forgot_pass = catch_async(async (req, res) => {
+  const result = await auth_services.forgot_pass(req.body);
+
+  send_response(res, {
+    status: httpStatus.OK,
+    message: "Check your email.",
+    data: result,
+  });
+});
+
+const reset_pass = catch_async(async (req, res) => {
+  const result = await auth_services.reset_pass_from_db(
+    req.headers.authorization as string,
+    req.body
+  );
+
+  send_response(res, {
+    status: httpStatus.OK,
+    message: "Password Reset Successfully.",
+    data: result,
+  });
+});
 
 // Controller to register a new user
 const register = catch_async(async (req, res) => {
@@ -25,6 +48,8 @@ const register = catch_async(async (req, res) => {
 });
 
 export const auth_controllers = {
-    register,
-    login
-}
+  register,
+  forgot_pass,
+  reset_pass,
+  login,
+};

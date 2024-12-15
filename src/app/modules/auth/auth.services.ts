@@ -6,8 +6,9 @@ import { cloudinary_uploader } from "../../middlewares/upload";
 import { TFile } from "../../types";
 import prisma from "../../utils/prisma";
 import bcrypt from "bcrypt";
-import { generate_token, sanitize_token_data } from "../../utils/jsonwebtoken";
+import { generate_token, sanitize_token_data, verify_token } from "../../utils/jsonwebtoken";
 import { Secret } from "jsonwebtoken";
+import email_sender from "../../utils/email_sender";
 
 const login = async (payload: { email: string; password: string }) => {
   const user_info = await prisma.user.findUniqueOrThrow({
@@ -25,6 +26,51 @@ const login = async (payload: { email: string; password: string }) => {
   const token = generate_token(token_data, local_config.user_jwt_secret as string);
 
   return { token };
+};
+
+const forgot_pass = async (payload: { email: string }) => {
+  const user_data = await prisma.user.findUniqueOrThrow({
+    where: { email: payload.email, status: "ACTIVE", isDeleted: false },
+  });
+
+  const tokenData = sanitize_token_data(user_data);
+
+  const token = generate_token(tokenData, local_config.user_jwt_secret as string);
+  const resetPassLink = `http://localhost:5173/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
+
+  await email_sender(
+    payload.email,
+    `
+    <div>
+        <p>Click for reset password.</p>
+        <a href='${resetPassLink}'>
+            <button>Click hare.</button>
+        </a>
+    </div>
+    `
+  );
+
+  return "Reset link sent on email.";
+};
+
+const reset_pass_from_db = async (token: string, payload: { password: string; id: string }) => {
+  if (!token) {
+    throw new http_error(httpStatus.UNAUTHORIZED, "You are not authorized.");
+  }
+  const verified_token = verify_token(token, local_config.user_jwt_secret as Secret);
+  if (!verified_token) {
+    throw new http_error(httpStatus.FORBIDDEN, "Forbidden.");
+  }
+  // Hashed password and set this in user data
+  const hashed_password = await bcrypt.hash(payload.password, Number(local_config.bcrypt_salt));
+  await prisma.user.update({
+    where: {
+      email: verified_token.email,
+    },
+    data: {
+      password: hashed_password,
+    },
+  });
 };
 
 const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFile) => {
@@ -46,7 +92,7 @@ const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFil
   if (uploaded_image_info?.secure_url) {
     user_data.profilePhoto = uploaded_image_info.secure_url;
   }
-  
+
   let created_user;
 
   // Check if the user's role is 'VENDOR'
@@ -90,5 +136,7 @@ const register_into_db = async (payload: { user: User; shop?: Shop }, file: TFil
 
 export const auth_services = {
   register_into_db,
+  forgot_pass,
+  reset_pass_from_db,
   login,
 };

@@ -25,6 +25,22 @@ const login = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0,
         data: result,
     });
 }));
+const forgot_pass = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield auth_services_1.auth_services.forgot_pass(req.body);
+    (0, send_response_1.default)(res, {
+        status: http_status_1.default.OK,
+        message: "Check your email.",
+        data: result,
+    });
+}));
+const reset_pass = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield auth_services_1.auth_services.reset_pass_from_db(req.headers.authorization, req.body);
+    (0, send_response_1.default)(res, {
+        status: http_status_1.default.OK,
+        message: "Password Reset Successfully.",
+        data: result,
+    });
+}));
 // Controller to register a new user
 const register = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield auth_services_1.auth_services.register_into_db(req.body, req.file);
@@ -36,5 +52,7 @@ const register = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void
 }));
 exports.auth_controllers = {
     register,
-    login
+    forgot_pass,
+    reset_pass,
+    login,
 };

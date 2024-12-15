@@ -14,4 +14,5 @@ export const local_config = {
   base_url: process.env.BASE_URL,
   store_id: process.env.STORE_ID,
   signature_key: process.env.SIGNATURE_KEY,
+  app_pass: process.env.APP_PASS
 };

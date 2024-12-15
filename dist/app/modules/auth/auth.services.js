@@ -21,6 +21,7 @@ const upload_1 = require("../../middlewares/upload");
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("../../utils/jsonwebtoken");
+const email_sender_1 = __importDefault(require("../../utils/email_sender"));
 const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const user_info = yield prisma_1.default.user.findUniqueOrThrow({
         where: { email: payload.email, status: client_1.UserStatus.ACTIVE, isDeleted: false },
@@ -32,6 +33,42 @@ const login = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const token_data = (0, jsonwebtoken_1.sanitize_token_data)(user_info);
     const token = (0, jsonwebtoken_1.generate_token)(token_data, config_1.local_config.user_jwt_secret);
     return { token };
+});
+const forgot_pass = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const user_data = yield prisma_1.default.user.findUniqueOrThrow({
+        where: { email: payload.email, status: "ACTIVE", isDeleted: false },
+    });
+    const tokenData = (0, jsonwebtoken_1.sanitize_token_data)(user_data);
+    const token = (0, jsonwebtoken_1.generate_token)(tokenData, config_1.local_config.user_jwt_secret);
+    const resetPassLink = `http://localhost:5173/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
+    yield (0, email_sender_1.default)(payload.email, `
+    <div>
+        <p>Click for reset password.</p>
+        <a href='${resetPassLink}'>
+            <button>Click hare.</button>
+        </a>
+    </div>
+    `);
+    return "Reset link sent on email.";
+});
+const reset_pass_from_db = (token, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!token) {
+        throw new http_error_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized.");
+    }
+    const verified_token = (0, jsonwebtoken_1.verify_token)(token, config_1.local_config.user_jwt_secret);
+    if (!verified_token) {
+        throw new http_error_1.default(http_status_1.default.FORBIDDEN, "Forbidden.");
+    }
+    // Hashed password and set this in user data
+    const hashed_password = yield bcrypt_1.default.hash(payload.password, Number(config_1.local_config.bcrypt_salt));
+    yield prisma_1.default.user.update({
+        where: {
+            email: verified_token.email,
+        },
+        data: {
+            password: hashed_password,
+        },
+    });
 });
 const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, function* () {
     if (payload.user.role === client_1.UserRole.ADMIN) {
@@ -81,5 +118,7 @@ const register_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, fu
 });
 exports.auth_services = {
     register_into_db,
+    forgot_pass,
+    reset_pass_from_db,
     login,
 };

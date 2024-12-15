@@ -14,9 +14,9 @@ export const initiate_payment = async (paymentInfo: TPaymentInfo) => {
   const result = await axios.post(local_config.base_url as string, {
     store_id: local_config.store_id,
     signature_key: local_config.signature_key,
-    success_url: `http://localhost:3000/api/v1/payments/success?trans_id=${paymentInfo.trans_id}`,
-    fail_url: `http://localhost:3000/api/v1/payments/failed?trans_id=${paymentInfo.trans_id}`,
-    cancel_url: `https://trek-tales-client.vercel.app`,
+    success_url: `https://hekto-server.vercel.app/api/v1/payments/success?trans_id=${paymentInfo.trans_id}`,
+    fail_url: `https://hekto-server.vercel.app/api/v1/payments/failed?trans_id=${paymentInfo.trans_id}`,
+    cancel_url: `https://hekto-1a747.web.app/`,
     tran_id: paymentInfo.trans_id,
     amount: paymentInfo.amount.toString(),
     currency: "BDT",

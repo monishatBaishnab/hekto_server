@@ -19,9 +19,9 @@ const initiate_payment = (paymentInfo) => __awaiter(void 0, void 0, void 0, func
     const result = yield axios_1.default.post(config_1.local_config.base_url, {
         store_id: config_1.local_config.store_id,
         signature_key: config_1.local_config.signature_key,
-        success_url: `http://localhost:3000/api/v1/payments/success?trans_id=${paymentInfo.trans_id}`,
-        fail_url: `http://localhost:3000/api/v1/payments/failed?trans_id=${paymentInfo.trans_id}`,
-        cancel_url: `https://trek-tales-client.vercel.app`,
+        success_url: `https://hekto-server.vercel.app/api/v1/payments/success?trans_id=${paymentInfo.trans_id}`,
+        fail_url: `https://hekto-server.vercel.app/api/v1/payments/failed?trans_id=${paymentInfo.trans_id}`,
+        cancel_url: `https://hekto-1a747.web.app/`,
         tran_id: paymentInfo.trans_id,
         amount: paymentInfo.amount.toString(),
         currency: "BDT",
