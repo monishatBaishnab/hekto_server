@@ -153,7 +153,7 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
 const create_one_into_db = (data, file, user) => __awaiter(void 0, void 0, void 0, function* () {
     const _a = data !== null && data !== void 0 ? data : {}, { categories } = _a, payload = __rest(_a, ["categories"]);
     // Validate if an image file is provided
-    if (!file) {
+    if (!file && !(payload === null || payload === void 0 ? void 0 : payload.images)) {
         throw new http_error_1.default(http_status_1.default.BAD_REQUEST, "Please select an image.");
     }
     // Prepare product data and set available quantity

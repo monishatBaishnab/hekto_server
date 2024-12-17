@@ -40,7 +40,7 @@ const forgot_pass = (payload) => __awaiter(void 0, void 0, void 0, function* () 
     });
     const tokenData = (0, jsonwebtoken_1.sanitize_token_data)(user_data);
     const token = (0, jsonwebtoken_1.generate_token)(tokenData, config_1.local_config.user_jwt_secret);
-    const resetPassLink = `http://localhost:5173/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
+    const resetPassLink = `https://hekto-1a747.web.app/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
     yield (0, email_sender_1.default)(payload.email, `
     <div>
         <p>Click for reset password.</p>

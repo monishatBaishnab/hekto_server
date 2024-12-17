@@ -36,7 +36,7 @@ const forgot_pass = async (payload: { email: string }) => {
   const tokenData = sanitize_token_data(user_data);
 
   const token = generate_token(tokenData, local_config.user_jwt_secret as string);
-  const resetPassLink = `http://localhost:5173/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
+  const resetPassLink = `https://hekto-1a747.web.app/password-recovery?id=${user_data.id}&action=reset&token=${token}`;
 
   await email_sender(
     payload.email,

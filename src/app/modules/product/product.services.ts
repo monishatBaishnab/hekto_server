@@ -154,7 +154,7 @@ const create_one_into_db = async (
 ) => {
   const { categories, ...payload } = data ?? {};
   // Validate if an image file is provided
-  if (!file) {
+  if (!file && !payload?.images) {
     throw new http_error(httpStatus.BAD_REQUEST, "Please select an image.");
   }
 
