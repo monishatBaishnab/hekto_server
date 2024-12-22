@@ -5,8 +5,12 @@ import parse_json from "../../middlewares/parse_json";
 import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
 
+
+// Create a new route instance
 const router = Router();
 
+
+// Route for initiating password recover
 router.post("/login", auth_controllers.login);
 
 router.post("/forgot-password", auth_controllers.forgot_pass);
