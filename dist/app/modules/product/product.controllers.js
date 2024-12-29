@@ -38,7 +38,7 @@ const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, 
 }));
 // Controller to create a new Product
 const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.create_one_into_db(req.body, req.file, req.user);
+    const result = yield product_services_1.product_services.create_one_into_db(req.body, req.files, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.CREATED,
         message: "Product created successfully.",
@@ -47,7 +47,7 @@ const create_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, vo
 }));
 // Controller to update an existing Product by ID
 const update_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield product_services_1.product_services.update_one_from_db(req.params.id, req.body, req.file, req.user);
+    const result = yield product_services_1.product_services.update_one_from_db(req.params.id, req.body, req.files, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
         message: "Product updated successfully.",

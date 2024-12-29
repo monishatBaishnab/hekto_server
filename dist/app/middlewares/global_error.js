@@ -12,7 +12,6 @@ const global_error = (err, req, res, next) => {
     const success = false;
     let status = (err === null || err === void 0 ? void 0 : err.statusCode) || http_status_1.default.BAD_REQUEST;
     let message = (err === null || err === void 0 ? void 0 : err.name) || "Something want wrong.";
-    // console.log(err);
     if (err instanceof zod_1.ZodError) {
         message = "Validation failed, check the input data for errors.";
     }

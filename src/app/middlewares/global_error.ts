@@ -10,7 +10,7 @@ const global_error = (err: any, req: Request, res: Response, next: NextFunction)
     let status: number = err?.statusCode || httpStatus.BAD_REQUEST;
     let message: string = err?.name || "Something want wrong.";
   
-    // console.log(err);
+
     if (err instanceof ZodError) {
       message = "Validation failed, check the input data for errors.";
     } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -22,7 +22,6 @@ const global_error = (err: any, req: Request, res: Response, next: NextFunction)
       status = err.statusCode;
       message = err.message;
     }
-  
     console.log(err);
 
     res.status(status).send({

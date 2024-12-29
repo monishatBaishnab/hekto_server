@@ -149,17 +149,17 @@ const fetch_single_from_db = async (id: string) => {
 // Function to create a new product in the database
 const create_one_into_db = async (
   data: Product & TProductCategories,
-  file: TFile,
+  files: TFile[],
   user: JwtPayload
 ) => {
   const { categories, ...payload } = data ?? {};
   // Validate if an image file is provided
-  if (!file && !payload?.images) {
+  if (!files?.length) {
     throw new http_error(httpStatus.BAD_REQUEST, "Please select an image.");
   }
 
   // Prepare product data and set available quantity
-  const shop_data = {
+  const product_data: Product = {
     ...payload,
     price: Number(payload.price),
     discount: Number(payload.discount),
@@ -172,19 +172,20 @@ const create_one_into_db = async (
     where: { user_id: user.id, isDeleted: false },
     select: { id: true },
   });
-  shop_data.shop_id = shop_info.id;
+  product_data.shop_id = shop_info.id;
 
-  // Upload the product image to Cloudinary and add uploaded image URL to product data
-  const uploaded_image = await cloudinary_uploader(file);
-  if (uploaded_image?.secure_url) {
-    shop_data.images = uploaded_image.secure_url;
+  // Upload the product images to Cloudinary and add uploaded image URL to product data
+  const promises = files?.map((file) => cloudinary_uploader(file));
+  const uploaded_images = await Promise.all(promises);
+  if (uploaded_images?.length) {
+    product_data.images = uploaded_images?.map((image) => image?.secure_url as string);
   }
 
   // Save product and associated categories in a database transaction
   const created_product = await prisma.$transaction(async (prisma_t) => {
     // Create the product record
     const product = await prisma_t.product.create({
-      data: shop_data,
+      data: product_data,
     });
 
     // Link the product with its categories
@@ -206,34 +207,43 @@ const create_one_into_db = async (
 const update_one_from_db = async (
   id: string,
   data: Product & TProductCategories,
-  file: TFile,
+  files: TFile[],
   user: JwtPayload
 ) => {
   // Ensure the product exists before updating
-  if (user.role === UserRole.VENDOR) {
-    await prisma.product.findUniqueOrThrow({
-      where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
-    });
-  } else {
-    await prisma.product.findUniqueOrThrow({
-      where: { id, isDeleted: false, shop: { isDeleted: false } },
-    });
-  }
+  await prisma.product.findUniqueOrThrow({
+    where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+  });
 
-  const { categories, ...payload } = data ?? {};
+  // Destructure filds from client data
+  const { categories, discount, price, quantity, images, ...payload } = data ?? {};
+
   // Prepare product data, including available quantity
-  const shop_data = {
+  const product_data: Partial<Product> = {
     ...payload,
-    discount: Number(payload.discount),
-    price: Number(payload.price),
-    quantity: Number(payload.quantity),
-    availableQuantity: Number(payload.quantity),
   };
 
-  // Upload product image to Cloudinary and add the URL to product data
-  const uploaded_image = await cloudinary_uploader(file);
-  if (uploaded_image?.secure_url) {
-    shop_data.images = uploaded_image.secure_url;
+  // Change the type
+  if (discount) {
+    product_data.discount = Number(discount);
+  }
+  if (price) {
+    product_data.price = Number(price);
+  }
+  if (quantity) {
+    product_data.quantity = Number(quantity);
+  }
+
+  // Upload the product images to Cloudinary and add uploaded image URL to product data
+  const promises = files?.map((file) => cloudinary_uploader(file));
+  const uploaded_files = await Promise.all(promises);
+
+  if (uploaded_files?.length) {
+    const uploaded_images = uploaded_files?.map((image) => image?.secure_url as string);
+    product_data.images = [...uploaded_images];
+  }
+  if (images) {
+    product_data.images?.unshift(...images);
   }
 
   // Separate categories into those to link and unlink
@@ -245,7 +255,7 @@ const update_one_from_db = async (
     // Update product details
     const product = await prisma_t.product.update({
       where: { id },
-      data: shop_data,
+      data: product_data,
     });
 
     // Link product to new categories

@@ -33,8 +33,25 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
             id: true,
             rating: true,
             comment: true,
-            user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true, createdAt: true } },
-            product: { select: { name: true } },
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    address: true,
+                    profilePhoto: true,
+                    createdAt: true,
+                },
+            },
+            product: {
+                select: {
+                    name: true,
+                    images: true,
+                    productCategory: {
+                        select: { category: { select: { id: true, name: true } } },
+                    },
+                },
+            },
         },
     });
     const total = yield prisma_1.default.review.count();

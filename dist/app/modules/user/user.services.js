@@ -142,7 +142,6 @@ const update_status_from_db = (id, payload) => __awaiter(void 0, void 0, void 0,
             isDeleted: true,
         };
     }
-    console.log(user_data);
     yield prisma_1.default.user.update({
         where: { id },
         data: user_data,

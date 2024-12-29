@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 enum UserStatus {
@@ -15,6 +15,7 @@ enum UserStatus {
 
 enum ShopStatus {
   ACTIVE
+  PENDING
   BLOCKED
 }
 
@@ -47,6 +48,7 @@ model User {
   password     String
   address      String?
   profilePhoto String?
+  bio          String?
   role         UserRole
   status       UserStatus @default(ACTIVE)
   isDeleted    Boolean    @default(false)
@@ -66,7 +68,7 @@ model Shop {
   user        User       @relation(fields: [user_id], references: [id])
   name        String     @db.VarChar(255)
   description String
-  logo        String
+  logo        String?
   status      ShopStatus @default(ACTIVE)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -99,7 +101,7 @@ model Product {
   quantity          Int
   availableQuantity Int
   description       String
-  images            String
+  images            String[]
   discount          Float?
   isDeleted         Boolean           @default(false)
   createdAt         DateTime          @default(now())

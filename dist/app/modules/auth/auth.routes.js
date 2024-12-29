@@ -10,7 +10,9 @@ const upload_1 = require("../../middlewares/upload");
 const parse_json_1 = __importDefault(require("../../middlewares/parse_json"));
 const auth_1 = __importDefault(require("../../middlewares/auth"));
 const client_1 = require("@prisma/client");
+// Create a new route instance
 const router = (0, express_1.Router)();
+// Route for initiating password recover
 router.post("/login", auth_controllers_1.auth_controllers.login);
 router.post("/forgot-password", auth_controllers_1.auth_controllers.forgot_pass);
 router.post("/reset-password", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR, client_1.UserRole.CUSTOMER), auth_controllers_1.auth_controllers.reset_pass);

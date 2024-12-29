@@ -150,30 +150,31 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
     return Object.assign(Object.assign({}, product), { productCategory: undefined, categories });
 });
 // Function to create a new product in the database
-const create_one_into_db = (data, file, user) => __awaiter(void 0, void 0, void 0, function* () {
+const create_one_into_db = (data, files, user) => __awaiter(void 0, void 0, void 0, function* () {
     const _a = data !== null && data !== void 0 ? data : {}, { categories } = _a, payload = __rest(_a, ["categories"]);
     // Validate if an image file is provided
-    if (!file && !(payload === null || payload === void 0 ? void 0 : payload.images)) {
+    if (!(files === null || files === void 0 ? void 0 : files.length)) {
         throw new http_error_1.default(http_status_1.default.BAD_REQUEST, "Please select an image.");
     }
     // Prepare product data and set available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), discount: Number(payload.discount), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
+    const product_data = Object.assign(Object.assign({}, payload), { price: Number(payload.price), discount: Number(payload.discount), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
     // Retrieve shop information for the authenticated user
     const shop_info = yield prisma_1.default.shop.findUniqueOrThrow({
         where: { user_id: user.id, isDeleted: false },
         select: { id: true },
     });
-    shop_data.shop_id = shop_info.id;
-    // Upload the product image to Cloudinary and add uploaded image URL to product data
-    const uploaded_image = yield (0, upload_1.cloudinary_uploader)(file);
-    if (uploaded_image === null || uploaded_image === void 0 ? void 0 : uploaded_image.secure_url) {
-        shop_data.images = uploaded_image.secure_url;
+    product_data.shop_id = shop_info.id;
+    // Upload the product images to Cloudinary and add uploaded image URL to product data
+    const promises = files === null || files === void 0 ? void 0 : files.map((file) => (0, upload_1.cloudinary_uploader)(file));
+    const uploaded_images = yield Promise.all(promises);
+    if (uploaded_images === null || uploaded_images === void 0 ? void 0 : uploaded_images.length) {
+        product_data.images = uploaded_images === null || uploaded_images === void 0 ? void 0 : uploaded_images.map((image) => image === null || image === void 0 ? void 0 : image.secure_url);
     }
     // Save product and associated categories in a database transaction
     const created_product = yield prisma_1.default.$transaction((prisma_t) => __awaiter(void 0, void 0, void 0, function* () {
         // Create the product record
         const product = yield prisma_t.product.create({
-            data: shop_data,
+            data: product_data,
         });
         // Link the product with its categories
         for (const category of categories || []) {
@@ -188,25 +189,35 @@ const create_one_into_db = (data, file, user) => __awaiter(void 0, void 0, void 
     return created_product;
 });
 // Updates a product in the database along with its associated categories.
-const update_one_from_db = (id, data, file, user) => __awaiter(void 0, void 0, void 0, function* () {
+const update_one_from_db = (id, data, files, user) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     // Ensure the product exists before updating
-    if (user.role === client_1.UserRole.VENDOR) {
-        yield prisma_1.default.product.findUniqueOrThrow({
-            where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
-        });
-    }
-    else {
-        yield prisma_1.default.product.findUniqueOrThrow({
-            where: { id, isDeleted: false, shop: { isDeleted: false } },
-        });
-    }
-    const _a = data !== null && data !== void 0 ? data : {}, { categories } = _a, payload = __rest(_a, ["categories"]);
+    yield prisma_1.default.product.findUniqueOrThrow({
+        where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+    });
+    // Destructure filds from client data
+    const _b = data !== null && data !== void 0 ? data : {}, { categories, discount, price, quantity, images } = _b, payload = __rest(_b, ["categories", "discount", "price", "quantity", "images"]);
     // Prepare product data, including available quantity
-    const shop_data = Object.assign(Object.assign({}, payload), { discount: Number(payload.discount), price: Number(payload.price), quantity: Number(payload.quantity), availableQuantity: Number(payload.quantity) });
-    // Upload product image to Cloudinary and add the URL to product data
-    const uploaded_image = yield (0, upload_1.cloudinary_uploader)(file);
-    if (uploaded_image === null || uploaded_image === void 0 ? void 0 : uploaded_image.secure_url) {
-        shop_data.images = uploaded_image.secure_url;
+    const product_data = Object.assign({}, payload);
+    // Change the type
+    if (discount) {
+        product_data.discount = Number(discount);
+    }
+    if (price) {
+        product_data.price = Number(price);
+    }
+    if (quantity) {
+        product_data.quantity = Number(quantity);
+    }
+    // Upload the product images to Cloudinary and add uploaded image URL to product data
+    const promises = files === null || files === void 0 ? void 0 : files.map((file) => (0, upload_1.cloudinary_uploader)(file));
+    const uploaded_files = yield Promise.all(promises);
+    if (uploaded_files === null || uploaded_files === void 0 ? void 0 : uploaded_files.length) {
+        const uploaded_images = uploaded_files === null || uploaded_files === void 0 ? void 0 : uploaded_files.map((image) => image === null || image === void 0 ? void 0 : image.secure_url);
+        product_data.images = [...uploaded_images];
+    }
+    if (images) {
+        (_a = product_data.images) === null || _a === void 0 ? void 0 : _a.unshift(...images);
     }
     // Separate categories into those to link and unlink
     const c_categories = (categories === null || categories === void 0 ? void 0 : categories.filter((category) => !category.isDeleted)) || [];
@@ -216,7 +227,7 @@ const update_one_from_db = (id, data, file, user) => __awaiter(void 0, void 0, v
         // Update product details
         const product = yield prisma_t.product.update({
             where: { id },
-            data: shop_data,
+            data: product_data,
         });
         // Link product to new categories
         for (const category of c_categories) {

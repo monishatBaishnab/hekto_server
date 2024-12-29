@@ -26,6 +26,9 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
       user: {
         select: { name: true, email: true, role: true },
       },
+      product: {
+        select: { _count: true },
+      },
     },
   });
 

@@ -2,6 +2,9 @@
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'BLOCKED');
 
 -- CreateEnum
+CREATE TYPE "ShopStatus" AS ENUM ('ACTIVE', 'PENDING', 'BLOCKED');
+
+-- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('CUSTOMER', 'VENDOR', 'ADMIN');
 
 -- CreateEnum
@@ -21,6 +24,7 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "address" TEXT,
     "profilePhoto" TEXT,
+    "bio" TEXT,
     "role" "UserRole" NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
@@ -36,7 +40,8 @@ CREATE TABLE "shops" (
     "user_id" TEXT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     "description" TEXT NOT NULL,
-    "logo" TEXT NOT NULL,
+    "logo" TEXT,
+    "status" "ShopStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
@@ -48,6 +53,8 @@ CREATE TABLE "shops" (
 CREATE TABLE "categories" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(255) NOT NULL,
+    "image" TEXT,
+    "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
@@ -64,7 +71,7 @@ CREATE TABLE "products" (
     "quantity" INTEGER NOT NULL,
     "availableQuantity" INTEGER NOT NULL,
     "description" TEXT NOT NULL,
-    "images" TEXT NOT NULL,
+    "images" TEXT[],
     "discount" DOUBLE PRECISION,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

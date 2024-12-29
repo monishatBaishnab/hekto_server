@@ -21,8 +21,25 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
       id: true,
       rating: true,
       comment: true,
-      user: { select: { id: true, name: true, email: true, address: true, profilePhoto: true, createdAt:true } },
-      product: { select: { name: true } },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          address: true,
+          profilePhoto: true,
+          createdAt: true,
+        },
+      },
+      product: {
+        select: {
+          name: true,
+          images: true,
+          productCategory: {
+            select: { category: { select: { id: true, name: true } } },
+          },
+        },
+      },
     },
   });
 

@@ -36,6 +36,9 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
             user: {
                 select: { name: true, email: true, role: true },
             },
+            product: {
+                select: { _count: true },
+            },
         },
     });
     const total = yield prisma_1.default.shop.count({

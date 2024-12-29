@@ -17,7 +17,7 @@ router.get("/:id", product_controllers.fetch_single);
 router.post(
   "/",
   auth(UserRole.ADMIN, UserRole.VENDOR),
-  multer_up.single("file"),
+  multer_up.array("files"),
   parse_json,
   product_controllers.create_one
 );
@@ -26,7 +26,7 @@ router.post(
 router.put(
   "/:id",
   auth(UserRole.ADMIN, UserRole.VENDOR),
-  multer_up.single("file"),
+  multer_up.array("files"),
   parse_json,
   product_controllers.update_one
 );

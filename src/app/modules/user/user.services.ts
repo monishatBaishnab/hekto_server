@@ -161,7 +161,7 @@ const update_status_from_db = async (
       isDeleted: true,
     };
   }
-  console.log(user_data);
+  
   await prisma.user.update({
     where: { id },
     data: user_data,
