@@ -23,6 +23,28 @@ const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_pagina
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
 const http_error_1 = __importDefault(require("../../errors/http_error"));
 const http_status_1 = __importDefault(require("http-status"));
+const user_utils_1 = require("./user.utils");
+// Service for fetching all states
+const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    const total_products = yield prisma_1.default.product.count();
+    const total_sales = yield prisma_1.default.order.count();
+    const orders = yield prisma_1.default.order.findMany();
+    const total_revenue = orders === null || orders === void 0 ? void 0 : orders.reduce((sum, order) => {
+        return (sum = sum + Number(order.total_price));
+    }, 0);
+    const total_users = yield prisma_1.default.user.count();
+    const orders_by_date = (0, user_utils_1.summarize_orders_by_date)(orders);
+    const result = {
+        total_products,
+        total_sales,
+        total_revenue,
+        orders_by_date,
+    };
+    if (user.role === "ADMIN") {
+        result.total_users = total_users;
+    }
+    return result;
+});
 // Service for fetching all users from the database
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
     // Sanitize query parameters for pagination and sorting
@@ -183,6 +205,7 @@ const delete_one_from_db = (id, user) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.user_services = {
     fetch_all_from_db,
+    fetch_all_states_from_db,
     fetch_single_from_db,
     create_admin_into_db,
     update_one_from_db,

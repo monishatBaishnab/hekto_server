@@ -10,6 +10,34 @@ import sanitize_paginate from "../../utils/sanitize_paginate";
 import wc_builder from "../../utils/wc_builder";
 import http_error from "../../errors/http_error";
 import httpStatus from "http-status";
+import { summarize_orders_by_date } from "./user.utils";
+
+// Service for fetching all states
+const fetch_all_states_from_db = async (user: JwtPayload) => {
+  const total_products = await prisma.product.count();
+  const total_sales = await prisma.order.count();
+  const orders = await prisma.order.findMany();
+  const total_revenue = orders?.reduce((sum, order) => {
+    return (sum = sum + Number(order.total_price));
+  }, 0);
+
+  const total_users = await prisma.user.count();
+
+  const orders_by_date = summarize_orders_by_date(orders);
+
+  const result: Record<string, unknown> = {
+    total_products,
+    total_sales,
+    total_revenue,
+    orders_by_date,
+  };
+
+  if (user.role === "ADMIN") {
+    result.total_users = total_users;
+  }
+  
+  return result;
+};
 
 // Service for fetching all users from the database
 const fetch_all_from_db = async (query: Record<string, unknown>) => {
@@ -161,7 +189,7 @@ const update_status_from_db = async (
       isDeleted: true,
     };
   }
-  
+
   await prisma.user.update({
     where: { id },
     data: user_data,
@@ -208,6 +236,7 @@ const delete_one_from_db = async (id: string, user: JwtPayload) => {
 
 export const user_services = {
   fetch_all_from_db,
+  fetch_all_states_from_db,
   fetch_single_from_db,
   create_admin_into_db,
   update_one_from_db,

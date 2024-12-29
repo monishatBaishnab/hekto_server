@@ -27,6 +27,15 @@ const fetch_all = (0, catch_async_1.default)((req, res) => __awaiter(void 0, voi
         meta: result.meta,
     });
 }));
+// Controller to fetch all users
+const fetch_states = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_services_1.user_services.fetch_all_states_from_db(req.user);
+    (0, send_response_1.default)(res, {
+        status: http_status_1.default.OK,
+        message: "Users retrieved successfully.",
+        data: result,
+    });
+}));
 // Controller to fetch a single user by ID
 const fetch_single = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_services_1.user_services.fetch_single_from_db(req.params.id);
@@ -72,6 +81,7 @@ const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, vo
 }));
 exports.user_controllers = {
     fetch_all,
+    fetch_states,
     fetch_single,
     create_admin,
     update_one,

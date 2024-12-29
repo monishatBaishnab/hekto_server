@@ -13,6 +13,8 @@ const client_1 = require("@prisma/client");
 const router = (0, express_1.Router)();
 // Route to fetch all users
 router.get("/", (0, auth_1.default)(client_1.UserRole.ADMIN), user_controllers_1.user_controllers.fetch_all);
+// Route to fetch all states
+router.get("/states", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR), user_controllers_1.user_controllers.fetch_states);
 // Route to fetch a single user by ID
 router.get("/:id", (0, auth_1.default)(client_1.UserRole.CUSTOMER, client_1.UserRole.VENDOR, client_1.UserRole.ADMIN), user_controllers_1.user_controllers.fetch_single);
 // Route to create a new user as 'ADMIN'

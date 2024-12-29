@@ -10,6 +10,9 @@ const router = Router();
 // Route to fetch all users
 router.get("/", auth(UserRole.ADMIN), user_controllers.fetch_all);
 
+// Route to fetch all states
+router.get("/states", auth(UserRole.ADMIN, UserRole.VENDOR), user_controllers.fetch_states);
+
 // Route to fetch a single user by ID
 router.get(
   "/:id",

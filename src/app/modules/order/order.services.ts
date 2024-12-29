@@ -3,7 +3,6 @@ import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../utils/prisma";
 import { generate_tran_id, initiate_payment } from "../payment/payment.utils";
 import { TOrderProducts } from "./order.types";
-import { calculate_total_price } from "./order.utils";
 import sanitize_paginate from "../../utils/sanitize_paginate";
 import wc_builder from "../../utils/wc_builder";
 
