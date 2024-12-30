@@ -14,25 +14,25 @@ import { summarize_orders_by_date } from "./user.utils";
 
 // Service for fetching all states
 const fetch_all_states_from_db = async (user: JwtPayload) => {
-  const shop_info = await prisma.shop.findUniqueOrThrow({
+  const shop_info = await prisma.shop.findUnique({
     where: { user_id: user.id },
   });
 
   const total_products = await prisma.product.count({
-    where: { ...(user.role === UserRole.VENDOR ? { shop_id: shop_info.id } : {}) },
+    where: { ...(user.role === UserRole.VENDOR && { shop_id: shop_info?.id }) },
   });
   const total_sales = await prisma.order.count({
     where: {
-      ...(user.role === UserRole.VENDOR
-        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-        : {}),
+      ...(user.role === UserRole.VENDOR && {
+        orderProduct: { some: { product: { shop_id: shop_info?.id } } },
+      }),
     },
   });
   const orders = await prisma.order.findMany({
     where: {
-      ...(user.role === UserRole.VENDOR
-        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-        : {}),
+      ...(user.role === UserRole.VENDOR && {
+        orderProduct: { some: { product: { shop_id: shop_info?.id } } },
+      }),
     },
     orderBy: { createdAt: "asc" },
   });
@@ -52,9 +52,9 @@ const fetch_all_states_from_db = async (user: JwtPayload) => {
       createdAt: {
         gte: thirtyDaysAgo,
       },
-      ...(user.role === UserRole.VENDOR
-        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-        : {}),
+      ...(user.role === UserRole.VENDOR && {
+        orderProduct: { some: { product: { shop_id: shop_info?.id } } },
+      }),
     },
     orderBy: {
       createdAt: "asc",
@@ -72,7 +72,7 @@ const fetch_all_states_from_db = async (user: JwtPayload) => {
   if (user.role === "ADMIN") {
     result.total_users = total_users;
   }
-
+console.log(result);
   return result;
 };
 
@@ -133,7 +133,15 @@ const fetch_single_from_db = async (id: string) => {
     },
   });
 
-  return user_info;
+  const followers = await prisma.follow.count({
+    where: {
+      shop: {
+        user_id: id,
+      },
+    },
+  });
+
+  return { ...user_info, followers };
 };
 
 // Service for creating an admin user

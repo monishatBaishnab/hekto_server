@@ -26,21 +26,21 @@ const http_status_1 = __importDefault(require("http-status"));
 const user_utils_1 = require("./user.utils");
 // Service for fetching all states
 const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    const shop_info = yield prisma_1.default.shop.findUniqueOrThrow({
+    const shop_info = yield prisma_1.default.shop.findUnique({
         where: { user_id: user.id },
     });
     const total_products = yield prisma_1.default.product.count({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR ? { shop_id: shop_info.id } : {})),
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id })),
     });
     const total_sales = yield prisma_1.default.order.count({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR
-            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-            : {})),
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && {
+            orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
+        })),
     });
     const orders = yield prisma_1.default.order.findMany({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR
-            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-            : {})),
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && {
+            orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
+        })),
         orderBy: { createdAt: "asc" },
     });
     const total_revenue = orders === null || orders === void 0 ? void 0 : orders.reduce((sum, order) => {
@@ -54,9 +54,9 @@ const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, fun
     const orders_of_this_months = yield prisma_1.default.order.findMany({
         where: Object.assign({ createdAt: {
                 gte: thirtyDaysAgo,
-            } }, (user.role === client_1.UserRole.VENDOR
-            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
-            : {})),
+            } }, (user.role === client_1.UserRole.VENDOR && {
+            orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
+        })),
         orderBy: {
             createdAt: "asc",
         },
@@ -71,6 +71,7 @@ const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, fun
     if (user.role === "ADMIN") {
         result.total_users = total_users;
     }
+    console.log(result);
     return result;
 });
 // Service for fetching all users from the database
@@ -123,7 +124,14 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
             },
         },
     });
-    return user_info;
+    const followers = yield prisma_1.default.follow.count({
+        where: {
+            shop: {
+                user_id: id,
+            },
+        },
+    });
+    return Object.assign(Object.assign({}, user_info), { followers });
 });
 // Service for creating an admin user
 const create_admin_into_db = (payload, file) => __awaiter(void 0, void 0, void 0, function* () {
