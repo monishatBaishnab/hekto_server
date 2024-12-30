@@ -6,7 +6,7 @@ import { UserRole } from "@prisma/client";
 const router = Router();
 
 // Route to fetch all orders
-router.get("/all", auth(UserRole.ADMIN), order_controllers.fetch_all);
+router.get("/all", auth(UserRole.ADMIN, UserRole.VENDOR), order_controllers.fetch_all);
 
 // Route to fetch my orders
 router.get(

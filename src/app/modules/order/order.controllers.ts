@@ -5,7 +5,7 @@ import { order_services } from "./order.services";
 
 // Controller to delete an existing Orders by ID
 const fetch_all = catch_async(async (req, res) => {
-  const result = await order_services.fetch_all_from_db(req.query);
+  const result = await order_services.fetch_all_from_db(req.query, req.user);
 
   send_response(res, {
     status: httpStatus.OK,

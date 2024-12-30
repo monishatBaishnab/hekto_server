@@ -26,14 +26,42 @@ const http_status_1 = __importDefault(require("http-status"));
 const user_utils_1 = require("./user.utils");
 // Service for fetching all states
 const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    const total_products = yield prisma_1.default.product.count();
-    const total_sales = yield prisma_1.default.order.count();
-    const orders = yield prisma_1.default.order.findMany();
+    const shop_info = yield prisma_1.default.shop.findUniqueOrThrow({
+        where: { user_id: user.id },
+    });
+    const total_products = yield prisma_1.default.product.count({
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR ? { shop_id: shop_info.id } : {})),
+    });
+    const total_sales = yield prisma_1.default.order.count({
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR
+            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+            : {})),
+    });
+    const orders = yield prisma_1.default.order.findMany({
+        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR
+            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+            : {})),
+        orderBy: { createdAt: "asc" },
+    });
     const total_revenue = orders === null || orders === void 0 ? void 0 : orders.reduce((sum, order) => {
         return (sum = sum + Number(order.total_price));
     }, 0);
     const total_users = yield prisma_1.default.user.count();
-    const orders_by_date = (0, user_utils_1.summarize_orders_by_date)(orders);
+    const now = new Date();
+    // Get the date 30 days ago
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const orders_of_this_months = yield prisma_1.default.order.findMany({
+        where: Object.assign({ createdAt: {
+                gte: thirtyDaysAgo,
+            } }, (user.role === client_1.UserRole.VENDOR
+            ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+            : {})),
+        orderBy: {
+            createdAt: "asc",
+        },
+    });
+    const orders_by_date = (0, user_utils_1.summarize_orders_by_date)(orders_of_this_months);
     const result = {
         total_products,
         total_sales,
@@ -82,6 +110,7 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
             email: true,
             profilePhoto: true,
             address: true,
+            bio: true,
             role: true,
             shop: {
                 select: {
@@ -89,6 +118,7 @@ const fetch_single_from_db = (id) => __awaiter(void 0, void 0, void 0, function*
                     id: true,
                     description: true,
                     logo: true,
+                    follow: { select: { user_id: true } },
                 },
             },
         },
@@ -135,7 +165,7 @@ const update_one_from_db = (id, payload, file, user) => __awaiter(void 0, void 0
         user_data.profilePhoto = uploaded_image_info.secure_url;
     }
     // Update user data in the database
-    yield prisma_1.default.user.update({
+    const u = yield prisma_1.default.user.update({
         where: { id },
         data: user_data,
     });

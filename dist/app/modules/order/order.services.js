@@ -30,7 +30,10 @@ const payment_utils_1 = require("../payment/payment.utils");
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
 const wc_builder_1 = __importDefault(require("../../utils/wc_builder"));
 const order_filterable_filds = ["payment_method", "payment_status", "order_status"];
-const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
+const fetch_all_from_db = (query, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const shop_info = yield prisma_1.default.shop.findUnique({
+        where: { user_id: user.id },
+    });
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Build where conditions based on the query (e.g., filtering by "payment_method", "payment_status", "order_status")
@@ -38,7 +41,14 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
     // Fetch orders from the database with the applied conditions, pagination, and sorting
     const orders = yield prisma_1.default.order.findMany({
         where: {
-            AND: whereConditions,
+            AND: [
+                { AND: whereConditions },
+                {
+                    AND: (shop_info === null || shop_info === void 0 ? void 0 : shop_info.id)
+                        ? { orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } } }
+                        : {},
+                },
+            ],
         },
         skip: skip,
         take: limit,

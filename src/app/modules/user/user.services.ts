@@ -14,17 +14,54 @@ import { summarize_orders_by_date } from "./user.utils";
 
 // Service for fetching all states
 const fetch_all_states_from_db = async (user: JwtPayload) => {
-  const total_products = await prisma.product.count();
-  const total_sales = await prisma.order.count();
-  const orders = await prisma.order.findMany();
+  const shop_info = await prisma.shop.findUniqueOrThrow({
+    where: { user_id: user.id },
+  });
+
+  const total_products = await prisma.product.count({
+    where: { ...(user.role === UserRole.VENDOR ? { shop_id: shop_info.id } : {}) },
+  });
+  const total_sales = await prisma.order.count({
+    where: {
+      ...(user.role === UserRole.VENDOR
+        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+        : {}),
+    },
+  });
+  const orders = await prisma.order.findMany({
+    where: {
+      ...(user.role === UserRole.VENDOR
+        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+        : {}),
+    },
+    orderBy: { createdAt: "asc" },
+  });
   const total_revenue = orders?.reduce((sum, order) => {
     return (sum = sum + Number(order.total_price));
   }, 0);
 
   const total_users = await prisma.user.count();
 
-  const orders_by_date = summarize_orders_by_date(orders);
+  const now = new Date();
 
+  // Get the date 30 days ago
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(now.getDate() - 30);
+  const orders_of_this_months = await prisma.order.findMany({
+    where: {
+      createdAt: {
+        gte: thirtyDaysAgo,
+      },
+      ...(user.role === UserRole.VENDOR
+        ? { orderProduct: { some: { product: { shop_id: shop_info.id } } } }
+        : {}),
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  const orders_by_date = summarize_orders_by_date(orders_of_this_months);
   const result: Record<string, unknown> = {
     total_products,
     total_sales,
@@ -35,7 +72,7 @@ const fetch_all_states_from_db = async (user: JwtPayload) => {
   if (user.role === "ADMIN") {
     result.total_users = total_users;
   }
-  
+
   return result;
 };
 
@@ -82,6 +119,7 @@ const fetch_single_from_db = async (id: string) => {
       email: true,
       profilePhoto: true,
       address: true,
+      bio: true,
       role: true,
       shop: {
         select: {
@@ -89,6 +127,7 @@ const fetch_single_from_db = async (id: string) => {
           id: true,
           description: true,
           logo: true,
+          follow: { select: { user_id: true } },
         },
       },
     },
@@ -152,7 +191,7 @@ const update_one_from_db = async (
   }
 
   // Update user data in the database
-  await prisma.user.update({
+  const u = await prisma.user.update({
     where: { id },
     data: user_data,
   });

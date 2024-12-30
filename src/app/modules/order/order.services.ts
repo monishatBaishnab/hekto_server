@@ -1,4 +1,4 @@
-import { Order, PaymentMethod } from "@prisma/client";
+import { Order, PaymentMethod, UserRole } from "@prisma/client";
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../utils/prisma";
 import { generate_tran_id, initiate_payment } from "../payment/payment.utils";
@@ -8,7 +8,10 @@ import wc_builder from "../../utils/wc_builder";
 
 const order_filterable_filds = ["payment_method", "payment_status", "order_status"];
 
-const fetch_all_from_db = async (query: Record<string, unknown>) => {
+const fetch_all_from_db = async (query: Record<string, unknown>, user: JwtPayload) => {
+  const shop_info = await prisma.shop.findUnique({
+    where: { user_id: user.id },
+  });
   // Sanitize query parameters for pagination and sorting
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
 
@@ -18,7 +21,14 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
   // Fetch orders from the database with the applied conditions, pagination, and sorting
   const orders = await prisma.order.findMany({
     where: {
-      AND: whereConditions,
+      AND: [
+        { AND: whereConditions },
+        {
+          AND: shop_info?.id
+            ? { orderProduct: { some: { product: { shop_id: shop_info?.id } } } }
+            : {},
+        },
+      ],
     },
     skip: skip,
     take: limit,
@@ -40,7 +50,6 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
 const fetch_my_from_db = async (query: Record<string, unknown>, user: JwtPayload) => {
   // Sanitize query parameters for pagination and sorting
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
-
   // Build where conditions based on the query (e.g., filtering by "payment_method", "payment_status", "order_status")
   const whereConditions = wc_builder(query, [], order_filterable_filds);
   const { shop_id } = query;

@@ -19,7 +19,7 @@ const send_response_1 = __importDefault(require("../../utils/send_response"));
 const order_services_1 = require("./order.services");
 // Controller to delete an existing Orders by ID
 const fetch_all = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield order_services_1.order_services.fetch_all_from_db(req.query);
+    const result = yield order_services_1.order_services.fetch_all_from_db(req.query, req.user);
     (0, send_response_1.default)(res, {
         status: http_status_1.default.OK,
         message: "Orders retrieved successfully.",
