@@ -75,6 +75,7 @@ model Shop {
   product     Product[]
   follow      Follow[]
   isDeleted   Boolean    @default(false)
+  Coupon      Coupon[]
 
   @@map("shops")
 }
@@ -183,4 +184,26 @@ model Follow {
 
   @@id([user_id, shop_id])
   @@map("followers")
+}
+
+enum DiscountBy {
+  AMOUNT
+  PERCENTAGE
+}
+
+model Coupon {
+  id          String     @id @default(uuid())
+  shop_id     String
+  shop        Shop       @relation(fields: [shop_id], references: [id], onDelete: Cascade)
+  coupon      String
+  discount    String
+  discount_by DiscountBy
+  is_active   Boolean    @default(true)
+  start_date  DateTime   @default(now())
+  end_date    DateTime
+  isDeleted   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("coupons")
 }
