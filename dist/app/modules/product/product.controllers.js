@@ -54,6 +54,15 @@ const update_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, vo
         data: result,
     });
 }));
+// Controller to update an existing Product by ID
+const update_status = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_services_1.product_services.update_status_from_db(req.params.id, req.body, req.user);
+    (0, send_response_1.default)(res, {
+        status: http_status_1.default.OK,
+        message: "Product status updated successfully.",
+        data: result,
+    });
+}));
 // Controller to delete an existing Product by ID
 const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield product_services_1.product_services.delete_one_from_db(req.params.id, req.user);
@@ -67,5 +76,6 @@ exports.product_controllers = {
     fetch_single,
     create_one,
     update_one,
+    update_status,
     delete_one,
 };

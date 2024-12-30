@@ -31,6 +31,15 @@ router.put(
   product_controllers.update_one
 );
 
+// Route to update an existing product status by ID
+router.put(
+  "/:id/status",
+  auth(UserRole.ADMIN),
+  multer_up.array("files"),
+  parse_json,
+  product_controllers.update_status
+);
+
 // Route to delete an existing product by ID
 router.delete("/:id", auth(UserRole.ADMIN, UserRole.VENDOR), product_controllers.delete_one);
 

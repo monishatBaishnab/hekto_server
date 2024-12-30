@@ -17,7 +17,11 @@ const fetch_all_from_db = async (query: Record<string, unknown>) => {
   const { page, limit, skip, sortBy, sortOrder } = sanitize_paginate(query);
 
   // Build where conditions based on the query (e.g., filtering by 'name')
-  const whereConditions = wc_builder(query, ["name"], ["name", "shop_id"]);
+  const whereConditions = wc_builder(
+    query,
+    ["name"],
+    ["name", "shop_id", "featured", "flash_sale"]
+  );
   const { categories: categoriesStr } = sanitize_queries(query, ["categories"]) || {};
 
   const categories =
@@ -278,6 +282,44 @@ const update_one_from_db = async (
   return updated_product;
 };
 
+const update_status_from_db = async (
+  id: string,
+  data: Product & TProductCategories,
+  user: JwtPayload
+) => {
+  // Ensure the product exists before updating
+  await prisma.product.findUniqueOrThrow({
+    where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+  });
+
+  // Destructure filds from client data
+  const { featured, flash_sale } = data ?? {};
+
+  // Prepare product data, including available quantity
+  const product_data: Partial<Product> = {};
+
+  if (featured) {
+    product_data.featured = true;
+  } else {
+    product_data.featured = false;
+  }
+
+  if (flash_sale) {
+    product_data.flash_sale = true;
+  } else {
+    product_data.flash_sale = false;
+  }
+
+  await prisma.product.update({
+    where: { id },
+    data: product_data,
+  });
+
+  // Fetch and return the updated product with associations
+  const updated_product = await fetch_single_from_db(id);
+  return updated_product;
+};
+
 const delete_one_from_db = async (id: string, user: JwtPayload) => {
   // Ensure the product exists before deleting
   if (user.role === UserRole.VENDOR) {
@@ -299,4 +341,5 @@ export const product_services = {
   create_one_into_db,
   update_one_from_db,
   delete_one_from_db,
+  update_status_from_db,
 };

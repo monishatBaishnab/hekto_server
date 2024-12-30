@@ -29,7 +29,11 @@ const fetch_single = catch_async(async (req, res) => {
 
 // Controller to create a new Product
 const create_one = catch_async(async (req, res) => {
-  const result = await product_services.create_one_into_db(req.body, req.files as TFile[], req.user);
+  const result = await product_services.create_one_into_db(
+    req.body,
+    req.files as TFile[],
+    req.user
+  );
 
   send_response(res, {
     status: httpStatus.CREATED,
@@ -40,10 +44,25 @@ const create_one = catch_async(async (req, res) => {
 
 // Controller to update an existing Product by ID
 const update_one = catch_async(async (req, res) => {
-  const result = await product_services.update_one_from_db(req.params.id, req.body, req.files as TFile[], req.user);
+  const result = await product_services.update_one_from_db(
+    req.params.id,
+    req.body,
+    req.files as TFile[],
+    req.user
+  );
   send_response(res, {
     status: httpStatus.OK,
     message: "Product updated successfully.",
+    data: result,
+  });
+});
+
+// Controller to update an existing Product by ID
+const update_status = catch_async(async (req, res) => {
+  const result = await product_services.update_status_from_db(req.params.id, req.body, req.user);
+  send_response(res, {
+    status: httpStatus.OK,
+    message: "Product status updated successfully.",
     data: result,
   });
 });
@@ -63,5 +82,6 @@ export const product_controllers = {
   fetch_single,
   create_one,
   update_one,
+  update_status,
   delete_one,
 };

@@ -103,6 +103,8 @@ model Product {
   description       String
   images            String[]
   discount          Float?
+  featured          Boolean           @default(false)
+  flash_sale        Boolean           @default(false)
   isDeleted         Boolean           @default(false)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt

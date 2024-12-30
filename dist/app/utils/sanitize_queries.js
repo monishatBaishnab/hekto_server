@@ -15,7 +15,8 @@ const sanitize_queries = (object, keys) => {
     keys.forEach((key) => {
         // Check if the object has the key to avoid undefined or invalid values
         if (object && Object.hasOwnProperty.call(object, key)) {
-            finalObject[key] = object[key];
+            const value = object[key];
+            finalObject[key] = (value == "true" ? true : value == "false" ? false : value);
         }
     });
     // Return the sanitized object containing only the desired keys

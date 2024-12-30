@@ -37,7 +37,7 @@ const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function*
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
     // Build where conditions based on the query (e.g., filtering by 'name')
-    const whereConditions = (0, wc_builder_1.default)(query, ["name"], ["name", "shop_id"]);
+    const whereConditions = (0, wc_builder_1.default)(query, ["name"], ["name", "shop_id", "featured", "flash_sale"]);
     const { categories: categoriesStr } = (0, sanitize_queries_1.default)(query, ["categories"]) || {};
     const categories = (categoriesStr === null || categoriesStr === void 0 ? void 0 : categoriesStr.split(", ").map((str) => str.trim()).filter((category) => category !== "")) || [];
     const and_conditions = [
@@ -246,6 +246,35 @@ const update_one_from_db = (id, data, files, user) => __awaiter(void 0, void 0, 
     const updated_product = yield fetch_single_from_db(id);
     return updated_product;
 });
+const update_status_from_db = (id, data, user) => __awaiter(void 0, void 0, void 0, function* () {
+    // Ensure the product exists before updating
+    yield prisma_1.default.product.findUniqueOrThrow({
+        where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+    });
+    // Destructure filds from client data
+    const { featured, flash_sale } = data !== null && data !== void 0 ? data : {};
+    // Prepare product data, including available quantity
+    const product_data = {};
+    if (featured) {
+        product_data.featured = true;
+    }
+    else {
+        product_data.featured = false;
+    }
+    if (flash_sale) {
+        product_data.flash_sale = true;
+    }
+    else {
+        product_data.flash_sale = false;
+    }
+    yield prisma_1.default.product.update({
+        where: { id },
+        data: product_data,
+    });
+    // Fetch and return the updated product with associations
+    const updated_product = yield fetch_single_from_db(id);
+    return updated_product;
+});
 const delete_one_from_db = (id, user) => __awaiter(void 0, void 0, void 0, function* () {
     // Ensure the product exists before deleting
     if (user.role === client_1.UserRole.VENDOR) {
@@ -266,4 +295,5 @@ exports.product_services = {
     create_one_into_db,
     update_one_from_db,
     delete_one_from_db,
+    update_status_from_db,
 };
