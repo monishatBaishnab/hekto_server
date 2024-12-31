@@ -18,6 +18,15 @@ const catch_async_1 = __importDefault(require("../../utils/catch_async"));
 const send_response_1 = __importDefault(require("../../utils/send_response"));
 const coupon_services_1 = require("./coupon.services");
 // Controller to fetch all Coupons
+const apply_coupon = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield coupon_services_1.coupon_services.apply_coupon(req.body);
+    (0, send_response_1.default)(res, {
+        status: http_status_1.default.OK,
+        message: "Coupon applied.",
+        data: result,
+    });
+}));
+// Controller to fetch all Coupons
 const fetch_all = (0, catch_async_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield coupon_services_1.coupon_services.fetch_all_from_db(req.query);
     (0, send_response_1.default)(res, {
@@ -54,6 +63,7 @@ const delete_one = (0, catch_async_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 exports.coupon_controllers = {
+    apply_coupon,
     fetch_all,
     create_one,
     update_one,

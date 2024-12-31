@@ -35,8 +35,6 @@ router.put(
 router.put(
   "/:id/status",
   auth(UserRole.ADMIN),
-  multer_up.array("files"),
-  parse_json,
   product_controllers.update_status
 );
 

@@ -27,18 +27,18 @@ const user_utils_1 = require("./user.utils");
 // Service for fetching all states
 const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, function* () {
     const shop_info = yield prisma_1.default.shop.findUnique({
-        where: { user_id: user.id },
+        where: { user_id: user.id, isDeleted: false },
     });
     const total_products = yield prisma_1.default.product.count({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id })),
+        where: Object.assign({ isDeleted: false }, (user.role === client_1.UserRole.VENDOR && { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id })),
     });
     const total_sales = yield prisma_1.default.order.count({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && {
+        where: Object.assign({ isDeleted: false }, (user.role === client_1.UserRole.VENDOR && {
             orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
         })),
     });
     const orders = yield prisma_1.default.order.findMany({
-        where: Object.assign({}, (user.role === client_1.UserRole.VENDOR && {
+        where: Object.assign({ isDeleted: false }, (user.role === client_1.UserRole.VENDOR && {
             orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
         })),
         orderBy: { createdAt: "asc" },
@@ -46,13 +46,17 @@ const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, fun
     const total_revenue = orders === null || orders === void 0 ? void 0 : orders.reduce((sum, order) => {
         return (sum = sum + Number(order.total_price));
     }, 0);
-    const total_users = yield prisma_1.default.user.count();
+    const total_users = yield prisma_1.default.user.count({
+        where: {
+            isDeleted: false,
+        },
+    });
     const now = new Date();
     // Get the date 30 days ago
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(now.getDate() - 30);
     const orders_of_this_months = yield prisma_1.default.order.findMany({
-        where: Object.assign({ createdAt: {
+        where: Object.assign({ isDeleted: false, createdAt: {
                 gte: thirtyDaysAgo,
             } }, (user.role === client_1.UserRole.VENDOR && {
             orderProduct: { some: { product: { shop_id: shop_info === null || shop_info === void 0 ? void 0 : shop_info.id } } },
@@ -71,7 +75,6 @@ const fetch_all_states_from_db = (user) => __awaiter(void 0, void 0, void 0, fun
     if (user.role === "ADMIN") {
         result.total_users = total_users;
     }
-    console.log(result);
     return result;
 });
 // Service for fetching all users from the database

@@ -289,7 +289,7 @@ const update_status_from_db = async (
 ) => {
   // Ensure the product exists before updating
   await prisma.product.findUniqueOrThrow({
-    where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+    where: { id, isDeleted: false},
   });
 
   // Destructure filds from client data

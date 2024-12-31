@@ -249,7 +249,7 @@ const update_one_from_db = (id, data, files, user) => __awaiter(void 0, void 0, 
 const update_status_from_db = (id, data, user) => __awaiter(void 0, void 0, void 0, function* () {
     // Ensure the product exists before updating
     yield prisma_1.default.product.findUniqueOrThrow({
-        where: { id, isDeleted: false, shop: { isDeleted: false, user_id: user.id } },
+        where: { id, isDeleted: false },
     });
     // Destructure filds from client data
     const { featured, flash_sale } = data !== null && data !== void 0 ? data : {};

@@ -75,6 +75,7 @@ const fetch_my_from_db = (query, user) => __awaiter(void 0, void 0, void 0, func
         where: {
             AND: [
                 ...whereConditions, // Ensure whereConditions is correctly formed as an array
+                { user_id: user.id },
                 shop_id ? { orderProduct: { some: { product: { shop_id } } } } : { user_id: user.id },
             ],
         },

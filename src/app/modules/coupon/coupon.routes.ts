@@ -8,6 +8,8 @@ const router = Router();
 // Route to fetch all coupons
 router.get("/", coupon_controllers.fetch_all);
 
+router.post("/apply", coupon_controllers.apply_coupon);
+
 // Route to create a new coupon
 router.post("/", auth(UserRole.VENDOR), coupon_controllers.create_one);
 

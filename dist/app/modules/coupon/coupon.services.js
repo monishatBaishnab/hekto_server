@@ -15,20 +15,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.coupon_services = void 0;
 const prisma_1 = __importDefault(require("../../utils/prisma"));
 const sanitize_paginate_1 = __importDefault(require("../../utils/sanitize_paginate"));
+// Service for apply coupon in order
+const apply_coupon = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const coupon_info = yield prisma_1.default.coupon.findUniqueOrThrow({
+        where: { id: payload.id },
+    });
+    yield prisma_1.default.shop.findUniqueOrThrow({
+        where: { id: payload.shop_id },
+    });
+    // Adjust 'now' to GMT+6
+    const now = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
+    // Dates from coupon info
+    const start_date = new Date(coupon_info.start_date);
+    const end_date = new Date(coupon_info.end_date);
+    // Extend end_date to include the full day
+    const end_of_day = new Date(end_date);
+    end_of_day.setUTCHours(23, 59, 59, 999);
+    // Validate coupon validity
+    if (start_date && start_date > now) {
+        throw new Error("Coupon is not yet valid.");
+    }
+    if (end_date && end_of_day < now) {
+        throw new Error("Coupon has expired.");
+    }
+    if (coupon_info.shop_id !== payload.shop_id) {
+        throw new Error("Coupon is not valid for this shop.");
+    }
+    return "Coupon applied successfully.";
+});
 // Fetch All coupons from database with pagination
 const fetch_all_from_db = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const { shop_id } = query;
+    const { shop_id, active } = query;
     // Sanitize query parameters for pagination and sorting
     const { page, limit, skip, sortBy, sortOrder } = (0, sanitize_paginate_1.default)(query);
+    const now = new Date(new Date().getTime() + 6 * 60 * 60 * 1000);
     // Fetch coupons from the database with the applied conditions, pagination, and sorting
     const coupons = yield prisma_1.default.coupon.findMany({
-        where: Object.assign({ isDeleted: false, is_active: true }, (shop_id ? { shop_id: shop_id } : {})),
+        where: Object.assign(Object.assign({ isDeleted: false, is_active: true }, (shop_id ? { shop_id: shop_id } : {})), (active ? { start_date: { lte: now }, end_date: { gte: now } } : {})),
         skip: skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
     });
     const total = yield prisma_1.default.coupon.count({
-        where: Object.assign({ isDeleted: false }, (shop_id ? { shop_id: shop_id } : {})),
+        where: Object.assign(Object.assign({ isDeleted: false, is_active: true }, (shop_id ? { shop_id: shop_id } : {})), (active ? { start_date: { lte: now }, end_date: { gte: now } } : {})),
     });
     // Return the list of coupons
     return { coupons, meta: { limit, page, total } };
@@ -70,6 +99,7 @@ const delete_one_from_db = (id, user) => __awaiter(void 0, void 0, void 0, funct
     return;
 });
 exports.coupon_services = {
+    apply_coupon,
     fetch_all_from_db,
     create_one_into_db,
     update_one_from_db,

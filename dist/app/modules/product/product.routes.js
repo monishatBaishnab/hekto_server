@@ -20,7 +20,7 @@ router.post("/", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.
 // Route to update an existing product by ID
 router.put("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR), upload_1.multer_up.array("files"), parse_json_1.default, product_controllers_1.product_controllers.update_one);
 // Route to update an existing product status by ID
-router.put("/:id/status", (0, auth_1.default)(client_1.UserRole.ADMIN), upload_1.multer_up.array("files"), parse_json_1.default, product_controllers_1.product_controllers.update_status);
+router.put("/:id/status", (0, auth_1.default)(client_1.UserRole.ADMIN), product_controllers_1.product_controllers.update_status);
 // Route to delete an existing product by ID
 router.delete("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR), product_controllers_1.product_controllers.delete_one);
 exports.product_routes = router;

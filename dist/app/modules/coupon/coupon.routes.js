@@ -11,6 +11,7 @@ const coupon_controllers_1 = require("./coupon.controllers");
 const router = (0, express_1.Router)();
 // Route to fetch all coupons
 router.get("/", coupon_controllers_1.coupon_controllers.fetch_all);
+router.post("/apply", coupon_controllers_1.coupon_controllers.apply_coupon);
 // Route to create a new coupon
 router.post("/", (0, auth_1.default)(client_1.UserRole.VENDOR), coupon_controllers_1.coupon_controllers.create_one);
 // Route to update an existing coupon by ID

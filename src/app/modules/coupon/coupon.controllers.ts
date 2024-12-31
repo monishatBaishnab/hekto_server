@@ -4,6 +4,16 @@ import send_response from "../../utils/send_response";
 import { coupon_services } from "./coupon.services";
 
 // Controller to fetch all Coupons
+const apply_coupon = catch_async(async (req, res) => {
+  const result = await coupon_services.apply_coupon(req.body);
+  send_response(res, {
+    status: httpStatus.OK,
+    message: "Coupon applied.",
+    data: result,
+  });
+});
+
+// Controller to fetch all Coupons
 const fetch_all = catch_async(async (req, res) => {
   const result = await coupon_services.fetch_all_from_db(req.query);
   send_response(res, {
@@ -46,6 +56,7 @@ const delete_one = catch_async(async (req, res) => {
 });
 
 export const coupon_controllers = {
+  apply_coupon,
   fetch_all,
   create_one,
   update_one,
